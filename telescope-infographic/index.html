@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interaktive Teleskop-Infografik</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <canvas id="starfield"></canvas>
+  <main id="infographic">
+    <div class="telescope-center" id="telescopeIcon"></div>
+    <!-- Neue Stern-Nodes mit Konstellationslinien -->
+    <svg id="constellation-lines" width="100%" height="100%" style="position:absolute;top:0;left:0;z-index:2;pointer-events:none;"></svg>
+    <div class="star-node" data-topic="geschichte" style="left:50%;top:10%;">Geschichte</div>
+    <div class="star-node" data-topic="erfinder" style="left:80%;top:28%;">Erfinder</div>
+    <div class="star-node" data-topic="zweck" style="left:85%;top:65%;">Zweck</div>
+    <div class="star-node" data-topic="entdeckungen" style="left:50%;top:88%;">Entdeckungen</div>
+    <div class="star-node" data-topic="physik" style="left:18%;top:65%;">Physik</div>
+    <div class="star-node" data-topic="typen" style="left:18%;top:28%;">Typen</div>
+    <div class="star-node" data-topic="funktion" style="left:8%;top:50%;">Funktionsweise</div>
+    <div class="star-node" data-topic="beruehmt" style="left:92%;top:50%;">Berühmte Teleskope</div>
+  </main>
+  <div id="modal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+  <script src="particles.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
