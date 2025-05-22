@@ -7,8 +7,11 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <header class="main-header">
+    <h1>Physik: Teleskope</h1>
+  </header>
   <canvas id="starfield"></canvas>
-  <main id="infographic">
+  <div id="infographic">
     <div class="telescope-center" id="telescopeIcon"></div>
     <!-- Neue Stern-Nodes mit Konstellationslinien -->
     <svg id="constellation-lines" width="100%" height="100%" style="position:absolute;top:0;left:0;z-index:2;pointer-events:none;"></svg>
@@ -20,13 +23,14 @@
     <div class="star-node" data-topic="typen" style="left:18%;top:28%;">Typen</div>
     <div class="star-node" data-topic="funktion" style="left:8%;top:50%;">Funktionsweise</div>
     <div class="star-node" data-topic="beruehmt" style="left:92%;top:50%;">Berühmte Teleskope</div>
-  </main>
+  </div>
   <div id="modal" class="modal hidden">
     <div class="modal-content">
       <span class="close-btn">&times;</span>
       <div id="modal-body"></div>
     </div>
   </div>
+  <footer class="watermark">Flashily created by Gwendolyn Erkut, T6b</footer>
   <script src="particles.min.js"></script>
   <script src="script.js"></script>
 </body>
