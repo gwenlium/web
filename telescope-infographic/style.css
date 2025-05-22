@@ -9,12 +9,25 @@ body, html {
   background: #0a1026;
 }
 
+body {
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  /* Darker, richer background for seamless transition */
+  background: radial-gradient(ellipse at 70% 30%, #6a7bbf33 0%, #0a102600 70%),
+              radial-gradient(ellipse at 20% 80%, #ffe06611 0%, #0a102600 80%),
+              linear-gradient(180deg, #070a18 0%, #10162a 100%);
+  overflow-x: hidden;
+}
+
 #starfield {
   position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
+  left: 0; top: 0;
+  width: 100vw; height: 100vh;
   z-index: 0;
+  pointer-events: none;
+  opacity: 0.95;
+  background: transparent;
 }
 
 #infographic {
@@ -135,7 +148,7 @@ body, html {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 10;
+  z-index: 1000; /* Increased z-index to be above header and all content */
   transition: opacity 0.3s, transform 0.3s;
   pointer-events: none;
   opacity: 0;
@@ -192,6 +205,7 @@ body, html {
   cursor: pointer;
   opacity: 0.7;
   transition: opacity 0.2s, transform 0.2s;
+  z-index: 20; /* Increased z-index */
 }
 .close-btn:hover {
   opacity: 1;
@@ -201,6 +215,61 @@ body, html {
   color: #eaf6ff;
   font-size: 1.1rem;
   line-height: 1.6;
+  text-align: center; /* Ensure text content of block children is centered */
+}
+#modal-body h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #ffe066 !important; /* Gold color */
+  font-size: 2.1rem;
+  text-align: center !important; /* Centered text */
+  font-weight: 800;
+  word-break: break-word;
+  white-space: normal;
+  display: block;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  text-shadow: 0 2px 6px rgba(26, 34, 56, 0.9), 0 0 1px rgba(255, 224, 102, 0.7);
+  position: relative; /* Added for z-index context */
+  z-index: 15; /* Ensure it's above other modal content if necessary */
+}
+
+/* Style for the main content within the modal */
+#modal-body > div {
+  text-align: left; /* Align general text to the left for readability */
+  margin-top: 1rem; /* Add some space below the h2 */
+}
+
+#modal-body > div p, 
+#modal-body > div b, 
+#modal-body > div strong,
+#modal-body > div span {
+  text-align: left; /* Ensure inline and paragraph text is left-aligned */
+  color: #eaf6ff; /* Ensure consistent text color */
+}
+
+#modal-body > div ul {
+  text-align: left; /* Ensure list items are left-aligned */
+  padding-left: 20px; /* Standard padding for lists */
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+#modal-body > div li {
+  text-align: left; /* Ensure list items are left-aligned */
+  margin-bottom: 0.5rem; /* Space between list items */
+  line-height: 1.5;
+}
+
+#modal-body > div img {
+  display: block; /* Ensure images are block elements */
+  margin-left: auto; /* Center images */
+  margin-right: auto; /* Center images */
+  max-width: 100%; /* Ensure images are responsive */
+  height: auto; /* Maintain aspect ratio */
+  border-radius: 8px; /* Softer edges for images */
+  margin-top: 10px;
+  margin-bottom: 15px;
 }
 
 /* Telescope view mini-game overlay */
@@ -299,7 +368,10 @@ body, html {
   font-weight: bold;
   color: #1a2238;
   text-align: center;
-  white-space: pre-line;
+  /* Ensures long words/titles wrap and don't overflow */
+  word-break: break-word;
+  white-space: normal;
+  padding: 0 0.3em;
 }
 .star-node svg {
   display: block;
@@ -333,42 +405,73 @@ body, html {
 
 .reset-zoom-btn, .random-btn {
   transition: background 0.2s, box-shadow 0.2s;
-}
-.reset-zoom-btn:hover, .random-btn:hover {
-  background: #fffbe6;
-  box-shadow: 0 0 24px #ffe066cc;
-}
-
-.modal-arrow {
-  position: absolute;
-  top: 50%;
-  font-size: 2.2em;
-  color: #4a90e2;
-  cursor: pointer;
-  user-select: none;
-  z-index: 12;
-  opacity: 0.7;
-  transition: opacity 0.2s, color 0.2s;
-}
-.modal-arrow.left { left: -36px; transform: translateY(-50%); }
-.modal-arrow.right { right: -36px; transform: translateY(-50%); }
-.modal-arrow:hover { opacity: 1; color: #ffe066; }
-
-.main-header {
-  width: 100vw;
+  font-weight: bold;
+  font-size: 1.08em;
+  padding: 0.6em 1.3em 0.7em 1.3em;
+  margin: 0.3em 0.2em;
+  letter-spacing: 0.01em;
+  box-sizing: border-box;
+  display: inline-block;
   text-align: center;
-  padding: 1.2em 0 0.5em 0;
-  background: transparent;
-  z-index: 20;
-  position: relative;
+  line-height: 1.2;
 }
-.main-header h1 {
+.reset-zoom-btn {
+  /* Add extra left/right margin for spacing from edge */
+  margin-right: 0.5em;
+}
+.random-btn {
+  margin-left: 0.5em;
+}
+
+/* Slider UI styles for starfield speed */
+#starfield-speed-slider-container {
+  position: fixed;
+  bottom: 54px; /* More space above watermark */
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(26,34,56,0.92);
+  padding: 0.4em 0.8em; /* Smaller, more compact */
+  border-radius: 1.2em;
+  box-shadow: 0 0 12px #ffe06666;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  user-select: none;
+  font-size: 0.95em;
+}
+#starfield-speed-slider-container label {
   color: #ffe066;
-  font-size: 2.3rem;
-  font-weight: 900;
-  letter-spacing: 0.04em;
-  margin: 0;
-  text-shadow: 0 2px 16px #1a2238cc, 0 0 2px #fff;
+  font-weight: bold;
+  font-size: 0.95em;
+  margin-right: 0.3em;
+}
+#starfield-speed-slider-container input[type="range"] {
+  width: 80px;
+  height: 18px;
+  vertical-align: middle;
+}
+#starfield-speed-slider-container span {
+  color: #fff;
+  font-weight: bold;
+  font-size: 0.95em;
+  margin-left: 0.2em;
+}
+@media (max-width: 600px) {
+  #starfield-speed-slider-container {
+    bottom: 32px;
+    padding: 0.3em 0.5em;
+    font-size: 0.85em;
+  }
+  #starfield-speed-slider-container label {
+    font-size: 0.85em;
+  }
+  #starfield-speed-slider-container span {
+    font-size: 0.85em;
+  }
+  #starfield-speed-slider-container input[type="range"] {
+    width: 60px;
+  }
 }
 
 .watermark {
@@ -385,9 +488,101 @@ body, html {
   pointer-events: none;
   padding-bottom: 0.5em;
   text-shadow: 0 1px 8px #1a2238cc;
+  display: block;
 }
 
-@media (max-width: 600px) {
-  .modal-arrow.left { left: -18px; }
-  .modal-arrow.right { right: -18px; }
+/* Main page header */
+.main-header {
+  text-align: center; /* Center the header text */
+  padding: 1.5rem 0;
+  position: relative; /* Ensure it stays on top if other elements overlap */
+  z-index: 50; /* High z-index to be above other elements */
 }
+
+.main-header h1 {
+  color: #ffe066; /* Gold color */
+  font-size: 2.8rem;
+  margin: 0;
+  font-weight: 800;
+  text-shadow: none; /* Removed text shadow */
+  letter-spacing: 0.02em;
+}
+
+/* Custom Scrollbar for Modal Content */
+.modal-content::-webkit-scrollbar {
+  width: 10px; /* Width of the scrollbar */
+}
+
+.modal-content::-webkit-scrollbar-track {
+  background: rgba(26, 34, 56, 0.95); /* Background of the scrollbar track, matching modal */
+  border-radius: 10px; /* Rounded corners for the track */
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+  background-color: #4a90e2; /* Color of the scrollbar thumb */
+  border-radius: 10px; /* Rounded corners for the thumb */
+  border: 2px solid rgba(26, 34, 56, 0.95); /* Creates padding around thumb, matching track background */
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+  background-color: #6aa0f2; /* Color of the thumb on hover */
+}
+
+/* For Firefox */
+.modal-content {
+  scrollbar-width: thin; /* "auto" or "thin" */
+  scrollbar-color: #4a90e2 rgba(26, 34, 56, 0.95); /* thumb and track color */
+}
+
+/* Ensure main modal's close button is clickable */
+#modal .close-btn {
+  z-index: 999; /* Very high z-index to ensure it's on top */
+  pointer-events: auto; /* Explicitly enable pointer events */
+}
+
+/* Sparkle burst effect for facts transition */
+.sparkle-burst {
+  pointer-events: none;
+  position: fixed;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fffbe6 60%, #ffe066 90%, #fff0 100%);
+  box-shadow: 0 0 16px 4px #ffe06688, 0 0 32px 8px #fffbe6aa;
+  opacity: 1;
+  z-index: 1100;
+  will-change: transform, opacity;
+}
+.sparkle-burst.vibrant {
+  background: radial-gradient(circle, #fffbe6 60%, #ffe066 90%, #4a90e2 100%);
+  box-shadow: 0 0 32px 12px #ffe066cc, 0 0 64px 24px #fffbe6ee, 0 0 0 4px #4a90e2;
+  filter: brightness(1.5) saturate(2.2);
+  animation: sparkleFlash 0.7s linear;
+}
+@keyframes sparkleFlash {
+  0% { filter: brightness(2.5) saturate(2.5); }
+  50% { filter: brightness(3.5) saturate(3.5); }
+  100% { filter: brightness(1.2) saturate(1.2); }
+}
+
+.transition-flash-line {
+  position: fixed;
+  left: 50vw;
+  top: 50vh;
+  height: 4px;
+  width: 200px;
+  background: linear-gradient(90deg, #ffe066 0%, #fffbe6 60%, #4a90e2 100%);
+  border-radius: 2px;
+  box-shadow: 0 0 32px 8px #ffe066cc, 0 0 64px 16px #fffbe6ee;
+  opacity: 0.85;
+  z-index: 1200;
+  transform-origin: 0 50%;
+  animation: flashLineAnim 0.7s cubic-bezier(.7,0,.3,1) forwards;
+}
+@keyframes flashLineAnim {
+  0% { opacity: 0.2; transform: scaleX(0.2) rotate(var(--angle,0deg)); }
+  40% { opacity: 1; transform: scaleX(1.1) rotate(var(--angle,0deg)); }
+  100% { opacity: 0; transform: scaleX(1.5) rotate(var(--angle,0deg)); }
+}
+
+/* ...existing code... */

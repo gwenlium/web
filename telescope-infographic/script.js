@@ -7,6 +7,63 @@ const STAR_COUNT = 180;
 let connectingLineSVG = null;
 let lastClickedButton = null;
 let orbsAndElementsAreVisible = true; // Added state variable
+let starSpeedMultiplier = 5; // New: multiplier for star speed, default to 5x
+
+// --- Slider UI for star speed ---
+function createStarSpeedSlider() {
+    const sliderContainer = document.createElement('div');
+    sliderContainer.id = 'starfield-speed-slider-container'; // For CSS targeting
+    sliderContainer.style.position = 'fixed';
+    sliderContainer.style.bottom = '54px'; // More space above watermark
+    sliderContainer.style.left = '50%';
+    sliderContainer.style.transform = 'translateX(-50%)';
+    sliderContainer.style.background = 'rgba(26,34,56,0.92)';
+    sliderContainer.style.padding = '0.4em 0.8em'; // Smaller, more compact
+    sliderContainer.style.borderRadius = '1.2em';
+    sliderContainer.style.boxShadow = '0 0 12px #ffe06666';
+    sliderContainer.style.zIndex = '40';
+    sliderContainer.style.display = 'flex';
+    sliderContainer.style.alignItems = 'center';
+    sliderContainer.style.gap = '0.5em';
+    sliderContainer.style.userSelect = 'none';
+
+    const label = document.createElement('label');
+    label.textContent = 'Sternfeld-Geschwindigkeit:';
+    label.style.color = '#ffe066';
+    label.style.fontWeight = 'bold';
+    label.style.fontSize = '0.95em';
+    label.style.marginRight = '0.3em';
+
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = '3'; // Minimum speed 3x
+    slider.max = '10'; // Maximum speed 10x
+    slider.step = '0.1'; // Finer control for steps
+    slider.value = '5'; // Default value 5x
+    slider.style.width = '80px'; // Smaller
+    slider.style.height = '18px';
+    slider.style.verticalAlign = 'middle';
+    slider.title = 'Sternfeld-Geschwindigkeit';
+
+    const valueLabel = document.createElement('span');
+    valueLabel.textContent = '5.0x'; // Initial display for 5x
+    valueLabel.style.color = '#fff';
+    valueLabel.style.fontWeight = 'bold';
+    valueLabel.style.fontSize = '0.95em';
+    valueLabel.style.marginLeft = '0.2em';
+
+    slider.addEventListener('input', () => {
+        starSpeedMultiplier = parseFloat(slider.value);
+        valueLabel.textContent = parseFloat(slider.value).toFixed(1) + 'x'; // Display with one decimal place
+    });
+
+    sliderContainer.appendChild(label);
+    sliderContainer.appendChild(slider);
+    sliderContainer.appendChild(valueLabel);
+    document.body.appendChild(sliderContainer);
+}
+createStarSpeedSlider();
+// --- End slider UI ---
 
 function resizeCanvas() {
   canvas.width = window.innerWidth;
@@ -49,7 +106,7 @@ function animateStars() {
     ctx.shadowBlur = 8;
     ctx.fill();
     ctx.restore();
-    star.y += star.speed;
+    star.y += star.speed * starSpeedMultiplier; // <-- Use multiplier
     if (star.y > canvas.height) {
       star.y = 0;
       star.x = Math.random() * canvas.width;
@@ -70,8 +127,8 @@ const topics = {
       <b>Entwicklungsschritte:</b>
       <ul>
         <li><b>Refraktoren (Linsenteleskope):</b> Frühe Teleskope nutzten Linsen zur Lichtbrechung. Ihre Qualität wurde durch verbesserte Glasherstellung und Optikdesigns stetig gesteigert.</li>
-        <li><b>Reflektoren (Spiegelteleskope):</b> Isaac Newton entwickelte um 1668 das erste Spiegelteleskop, um Farbfehler (chromatische Aberration) von Linsen zu umgehen. Dies eröffnete den Weg zu größeren Öffnungen.</li>
-        <li><b>Riesenteleskope:</b> Im 19. und 20. Jahrhundert wurden immer größere Teleskope gebaut, wie das Hooker-Teleskop am Mount Wilson, mit dem Edwin Hubble die Expansion des Universums entdeckte.</li>
+        <li><b>Reflektoren (Spiegelteleskope):</b> Isaac Newton entwickelte um 1668 das erste Spiegelteleskop, um Farbfehler (chromatische Aberration) von Linsen zu umgehen. Dies eröffnete den Weg zu grösseren Öffnungen.</li>
+        <li><b>Riesenteleskope:</b> Im 19. und 20. Jahrhundert wurden immer grössere Teleskope gebaut, wie das Hooker-Teleskop am Mount Wilson, mit dem Edwin Hubble die Expansion des Universums entdeckte.</li>
         <li><b>Weltraumteleskope:</b> Das Hubble Space Telescope (1990) und das James Webb Space Telescope (2021) umgehen die störende Erdatmosphäre und ermöglichen tiefere und schärfere Einblicke ins Universum in verschiedenen Wellenlängen.</li>
       </ul>
       Die Entwicklung ist ein kontinuierlicher Prozess, angetrieben von wissenschaftlicher Neugier und technologischem Fortschritt.
@@ -82,17 +139,17 @@ const topics = {
     html: `
       <img src="assets/erfinder_teleskope.jpg" alt="Porträts von Lippershey und Galileo" style="width:100%; max-height:200px; object-fit:cover; margin-top:10px; border-radius:5px; margin-bottom:15px;">
       Obwohl die genaue Urheberschaft umstritten ist, werden mehrere Schlüsselfiguren mit der Erfindung und frühen Entwicklung des Teleskops in Verbindung gebracht:<br>
-      <b>Hans Lippershey (ca. 1570–1619):</b> Ein deutsch-niederländischer Brillenmacher, der 1608 in den Niederlanden ein Patent für ein Fernrohr mit etwa dreifacher Vergrößerung einreichte. Er gilt oft als der offizielle Erfinder, da sein Antrag der früheste dokumentierte ist.<br>
+      <b>Hans Lippershey (ca. 1570–1619):</b> Ein deutsch-niederländischer Brillenmacher, der 1608 in den Niederlanden ein Patent für ein Fernrohr mit etwa dreifacher Vergrösserung einreichte. Er gilt oft als der offizielle Erfinder, da sein Antrag der früheste dokumentierte ist.<br>
       <b>Sacharias Janssen (ca. 1585–ca. 1632):</b> Ein weiterer niederländischer Brillenmacher, der möglicherweise schon vor Lippershey ein ähnliches Instrument konstruiert hatte. Die Beweislage ist jedoch weniger eindeutig.<br>
       <b>Jacob Metius (nach 1571–1628/1631):</b> Auch er reichte kurz nach Lippershey ein Patent für ein Fernrohr ein. Sein Entwurf wurde jedoch als weniger leistungsfähig eingeschätzt.<br>
-      <b>Galileo Galilei (1564–1642):</b> Der italienische Astronom und Physiker erfuhr von der niederländischen Erfindung und baute auf Basis der Beschreibung eigene, deutlich verbesserte Teleskope mit bis zu 30-facher Vergrößerung. Entscheidend war, dass er seine Instrumente konsequent für Himmelsbeobachtungen einsetzte und seine revolutionären Entdeckungen publizierte, was dem Teleskop zu weltweiter Bekanntheit verhalf.
+      <b>Galileo Galilei (1564–1642):</b> Der italienische Astronom und Physiker erfuhr von der niederländischen Erfindung und baute auf Basis der Beschreibung eigene, deutlich verbesserte Teleskope mit bis zu 30-facher Vergrösserung. Entscheidend war, dass er seine Instrumente konsequent für Himmelsbeobachtungen einsetzte und seine revolutionären Entdeckungen publizierte, was dem Teleskop zu weltweiter Bekanntheit verhalf.
     `
   },
   'zweck': {
     title: 'Der vielfältige Zweck von Teleskopen',
     html: `
       <img src="assets/zweck_teleskope.jpg" alt="Anwendungen von Teleskopen: Astronomie, Navigation, Überwachung" style="width:100%; max-height:200px; object-fit:cover; margin-top:10px; border-radius:5px; margin-bottom:15px;">
-      Teleskope sind Instrumente, die entwickelt wurden, um das Sehen über die natürlichen Grenzen des menschlichen Auges hinaus zu erweitern. Ihr Hauptzweck ist das Sammeln und Fokussieren von elektromagnetischer Strahlung, meist sichtbares Licht, um vergrößerte, hellere oder detailliertere Bilder entfernter Objekte zu erzeugen.<br>
+      Teleskope sind Instrumente, die entwickelt wurden, um das Sehen über die natürlichen Grenzen des menschlichen Auges hinaus zu erweitern. Ihr Hauptzweck ist das Sammeln und Fokussieren von elektromagnetischer Strahlung, meist sichtbares Licht, um vergrösserte, hellere oder detailliertere Bilder entfernter Objekte zu erzeugen.<br>
       <b>Frühe Anwendungen:</b>
       <ul>
         <li><b>Militär:</b> Frühe Fernrohre dienten der Beobachtung feindlicher Truppenbewegungen und gaben einen strategischen Vorteil.</li>
@@ -119,11 +176,11 @@ const topics = {
         <li><b>Mondkrater und Sonnenflecken (Galilei):</b> Zeigten, dass Himmelskörper nicht perfekt sind, sondern Oberflächenstrukturen und Veränderungen aufweisen.</li>
         <li><b>Ringe des Saturn (Huygens, 1655):</b> Christiaan Huygens identifizierte die zuvor rätselhaften "Henkel" des Saturn als ein Ringsystem.</li>
         <li><b>Entdeckung von Uranus (Herschel, 1781) und Neptun (Galle, Le Verrier, Adams, 1846):</b> Erweiterung des bekannten Sonnensystems.</li>
-        <li><b>Struktur der Milchstraße und Existenz anderer Galaxien (Hubble, 1920er):</b> Edwin Hubble zeigte, dass die Milchstraße nur eine von vielen Galaxien ist und das Universum viel größer ist als gedacht.</li>
+        <li><b>Struktur der Milchstrasse und Existenz anderer Galaxien (Hubble, 1920er):</b> Edwin Hubble zeigte, dass die Milchstrasse nur eine von vielen Galaxien ist und das Universum viel grösser ist als gedacht.</li>
         <li><b>Expansion des Universums (Hubble, 1929):</b> Die Beobachtung, dass sich Galaxien voneinander entfernen (Rotverschiebung), führte zur Urknalltheorie.</li>
         <li><b>Quasare, Pulsare, Schwarze Löcher:</b> Entdeckungen, die unser Verständnis extremer physikalischer Bedingungen erweiterten.</li>
         <li><b>Kosmische Mikrowellenhintergrundstrahlung (Penzias & Wilson, 1964):</b> Ein Echo des Urknalls.</li>
-        <li><b>Exoplaneten (ab 1990er):</b> Die Entdeckung von Tausenden Planeten außerhalb unseres Sonnensystems, was die Frage nach Leben im All neu befeuert.</li>
+        <li><b>Exoplaneten (ab 1990er):</b> Die Entdeckung von Tausenden Planeten ausserhalb unseres Sonnensystems, was die Frage nach Leben im All neu befeuert.</li>
         <li><b>Beschleunigte Expansion des Universums (1998):</b> Entdeckung der Dunklen Energie.</li>
       </ul>
       Jede neue Generation von Teleskopen bringt weitere, oft unerwartete Entdeckungen.
@@ -136,9 +193,9 @@ const topics = {
       Teleskope funktionieren durch das Sammeln und Fokussieren von elektromagnetischer Strahlung. Die grundlegenden physikalischen Prinzipien sind Optik und Wellentheorie.<br>
       <b>Grundprinzip:</b>
       <ul>
-        <li><b>Lichtsammelvermögen:</b> Die wichtigste Eigenschaft eines Teleskops ist seine Öffnung (Durchmesser des Objektivs/Spiegels). Je größer die Öffnung, desto mehr Licht kann gesammelt werden, was lichtschwächere Objekte sichtbar macht. Das Lichtsammelvermögen steigt mit dem Quadrat der Öffnung.</li>
-        <li><b>Auflösungsvermögen:</b> Die Fähigkeit, feine Details zu unterscheiden. Sie hängt von der Öffnung und der Wellenlänge des Lichts ab. Größere Öffnungen und kürzere Wellenlängen führen zu höherer Auflösung (Beugungsbegrenzung).</li>
-        <li><b>Vergrößerung:</b> Das Verhältnis der Brennweite des Objektivs zur Brennweite des Okulars. Eine hohe Vergrößerung ist nur sinnvoll, wenn das Teleskop genügend Licht sammelt und eine gute Auflösung hat.</li>
+        <li><b>Lichtsammelvermögen:</b> Die wichtigste Eigenschaft eines Teleskops ist seine Öffnung (Durchmesser des Objektivs/Spiegels). Je grösser die Öffnung, desto mehr Licht kann gesammelt werden, was lichtschwächere Objekte sichtbar macht. Das Lichtsammelvermögen steigt mit dem Quadrat der Öffnung.</li>
+        <li><b>Auflösungsvermögen:</b> Die Fähigkeit, feine Details zu unterscheiden. Sie hängt von der Öffnung und der Wellenlänge des Lichts ab. Grössere Öffnungen und kürzere Wellenlängen führen zu höherer Auflösung (Beugungsbegrenzung).</li>
+        <li><b>Vergrösserung:</b> Das Verhältnis der Brennweite des Objektivs zur Brennweite des Okulars. Eine hohe Vergrösserung ist nur sinnvoll, wenn das Teleskop genügend Licht sammelt und eine gute Auflösung hat.</li>
       </ul>
       <b>Wichtige Begriffe:</b>
       <ul>
@@ -147,7 +204,7 @@ const topics = {
       </ul>
       <b>Spektralbereiche:</b> Teleskope sind nicht auf sichtbares Licht beschränkt. Es gibt Teleskope für:
       <ul>
-        <li><b>Radiowellen:</b> Große Schüsseln (z.B. VLA, ALMA).</li>
+        <li><b>Radiowellen:</b> Grosse Schüsseln (z.B. VLA, ALMA).</li>
         <li><b>Infrarot:</b> Oft gekühlt, um Eigenstrahlung zu minimieren (z.B. Spitzer, JWST). Wichtig für die Beobachtung von Staubwolken und jungen Sternen.</li>
         <li><b>Ultraviolett, Röntgen, Gammastrahlen:</b> Müssen im Weltraum betrieben werden, da die Atmosphäre diese Strahlung absorbiert (z.B. Chandra, Fermi).</li>
       </ul>
@@ -168,16 +225,16 @@ const topics = {
           <ul>
             <li>Nutzt ein Objektiv aus einer oder mehreren Linsen, um das Licht zu brechen (Refraktion) und zu bündeln.</li>
             <li>Vorteile: Geschlossener Tubus schützt Optik, kontrastreiche Bilder, wartungsarm.</li>
-            <li>Nachteile: Anfällig für Farbfehler (chromatische Aberration), teuer und schwer bei großen Öffnungen.</li>
+            <li>Nachteile: Anfällig für Farbfehler (chromatische Aberration), teuer und schwer bei grossen Öffnungen.</li>
             <li>Beispiele: Kleine Einsteigerteleskope, historische Sternwarten-Teleskope.</li>
           </ul>
         </li>
         <li><b>Spiegelteleskop (Reflektor):</b>
           <ul>
             <li>Nutzt einen Hauptspiegel (meist parabolisch), um das Licht zu reflektieren und zu sammeln. Es gibt verschiedene Bauarten (Newton, Cassegrain, Ritchey-Chrétien etc.), die sich in der Anordnung weiterer Spiegel unterscheiden.</li>
-            <li>Vorteile: Keine Farbfehler, kostengünstiger für große Öffnungen.</li>
+            <li>Vorteile: Keine Farbfehler, kostengünstiger für grosse Öffnungen.</li>
             <li>Nachteile: Offener Tubus kann verschmutzen, eventuell Justage erforderlich, Abschattung durch Fangspiegel.</li>
-            <li>Beispiele: Die meisten großen Forschungsteleskope, viele Amateur-Teleskope (z.B. Dobson).</li>
+            <li>Beispiele: Die meisten grossen Forschungsteleskope, viele Amateur-Teleskope (z.B. Dobson).</li>
           </ul>
         </li>
         <li><b>Katadioptrisches Teleskop (Spiegel-Linsen-System):</b>
@@ -189,14 +246,14 @@ const topics = {
         </li>
         <li><b>Radioteleskop:</b>
           <ul>
-            <li>Empfängt Radiowellen aus dem All mit großen Antennenschüsseln oder Dipolantennen-Feldern.</li>
+            <li>Empfängt Radiowellen aus dem All mit grossen Antennenschüsseln oder Dipolantennen-Feldern.</li>
             <li>Ermöglichen die Untersuchung von Phänomenen, die im sichtbaren Licht nicht oder kaum beobachtbar sind (z.B. kalte Gaswolken, Pulsare, aktive galaktische Kerne).</li>
             <li>Oft zu Interferometern zusammengeschaltet, um höhere Auflösungen zu erzielen (z.B. Event Horizon Telescope).</li>
           </ul>
         </li>
         <li><b>Weltraumteleskop:</b>
           <ul>
-            <li>Operieren außerhalb der Erdatmosphäre, um deren Filterwirkung und Störungen (Seeing, Wetter) zu umgehen.</li>
+            <li>Operieren ausserhalb der Erdatmosphäre, um deren Filterwirkung und Störungen (Seeing, Wetter) zu umgehen.</li>
             <li>Ermöglichen Beobachtungen in Wellenlängenbereichen, die vom Boden aus nicht zugänglich sind (UV, Röntgen, Gamma, Teile des Infrarot).</li>
             <li>Beispiele: Hubble (UV/Vis/NIR), James Webb (Infrarot), Chandra (Röntgen).</li>
           </ul>
@@ -215,13 +272,13 @@ const topics = {
         <li><b>Objektiv (Primäroptik):</b>
           <ul>
             <li>Dies ist das Herzstück des Teleskops. Es ist entweder eine Linse (bei Refraktoren) oder ein Spiegel (bei Reflektoren).</li>
-            <li>Seine Aufgabe ist es, das von einem Objekt kommende parallele Licht zu sammeln und in einem Punkt, dem Brennpunkt (Fokus), zu bündeln. Je größer der Durchmesser (Öffnung) des Objektivs, desto mehr Licht wird gesammelt und desto lichtschwächere Objekte können gesehen bzw. feiner aufgelöst werden.</li>
+            <li>Seine Aufgabe ist es, das von einem Objekt kommende parallele Licht zu sammeln und in einem Punkt, dem Brennpunkt (Fokus), zu bündeln. Je grösser der Durchmesser (Öffnung) des Objektivs, desto mehr Licht wird gesammelt und desto lichtschwächere Objekte können gesehen bzw. feiner aufgelöst werden.</li>
           </ul>
         </li>
         <li><b>Okular (Sekundäroptik):</b>
           <ul>
-            <li>Das Okular ist eine kleinere Linse oder Linsengruppe, durch die der Beobachter schaut. Es funktioniert wie eine Lupe und vergrößert das vom Objektiv erzeugte reelle Bild.</li>
-            <li>Durch Wechseln des Okulars kann die Vergrößerung des Teleskops verändert werden.</li>
+            <li>Das Okular ist eine kleinere Linse oder Linsengruppe, durch die der Beobachter schaut. Es funktioniert wie eine Lupe und vergrössert das vom Objektiv erzeugte reelle Bild.</li>
+            <li>Durch Wechseln des Okulars kann die Vergrösserung des Teleskops verändert werden.</li>
             <li>Bei fotografischer oder spektroskopischer Nutzung kann anstelle des Okulars ein Detektor (CCD-Chip, Fotoplatte) oder ein Spektrograph platziert werden.</li>
           </ul>
         </li>
@@ -273,7 +330,7 @@ const topics = {
         </li>
         <li><b>Gran Telescopio Canarias (GTC / La Palma):</b>
           <ul>
-            <li>Mit einem segmentierten Spiegel von 10,4 Metern Durchmesser eines der größten optischen Einzelteleskope der Welt.</li>
+            <li>Mit einem segmentierten Spiegel von 10,4 Metern Durchmesser eines der grössten optischen Einzelteleskope der Welt.</li>
             <li>Steht auf La Palma, Kanarische Inseln.</li>
           </ul>
         </li>
@@ -285,14 +342,14 @@ const topics = {
         </li>
         <li><b>Arecibo-Observatorium (Puerto Rico, 1963–2020):</b>
           <ul>
-            <li>War mit 305 Metern Durchmesser jahrzehntelang das größte Einzelantennen-Radioteleskop der Welt.</li>
+            <li>War mit 305 Metern Durchmesser jahrzehntelang das grösste Einzelantennen-Radioteleskop der Welt.</li>
             <li>Berühmt für Entdeckungen von Pulsaren, Studien der Erdatmosphäre und die Arecibo-Botschaft. Leider 2020 kollabiert.</li>
           </ul>
         </li>
          <li><b>Square Kilometre Array (SKA):</b>
           <ul>
             <li>Ein im Bau befindliches Radioteleskop-Netzwerk in Australien und Südafrika.</li>
-            <li>Wird nach Fertigstellung das größte Radioteleskop der Welt sein und fundamentale Fragen der Astrophysik und Kosmologie adressieren.</li>
+            <li>Wird nach Fertigstellung das grösste Radioteleskop der Welt sein und fundamentale Fragen der Astrophysik und Kosmologie adressieren.</li>
           </ul>
         </li>
       </ul>
@@ -393,12 +450,107 @@ document.querySelectorAll('.star-node').forEach(node => {
 });
 
 // Modified click listener for the central telescope icon
-document.getElementById('telescopeIcon').addEventListener('click', function() {
-    orbsAndElementsAreVisible = !orbsAndElementsAreVisible;
-    if (!orbsAndElementsAreVisible && !modal.classList.contains('hidden') && lastClickedButton && nodes.includes(lastClickedButton)) {
-        closeModal();
+// Enhanced: Seamless, warp speed transition to facts.html
+const telescopeIcon = document.getElementById('telescopeIcon');
+telescopeIcon.addEventListener('click', function() {
+    // Prevent double trigger
+    if (telescopeIcon._transitioning) return;
+    telescopeIcon._transitioning = true;
+    const infographic = document.getElementById('infographic');
+    infographic.style.transition = 'opacity 0.5s cubic-bezier(.34,1.56,.64,1)';
+    infographic.style.opacity = '0';
+    // Fade out starfield
+    canvas.style.transition = 'opacity 0.5s cubic-bezier(.34,1.56,.64,1)';
+    canvas.style.opacity = '0.2';
+    // Add dark overlay
+    let overlay = document.createElement('div');
+    overlay.id = 'facts-transition-overlay';
+    overlay.style.position = 'fixed';
+    overlay.style.left = '0';
+    overlay.style.top = '0';
+    overlay.style.width = '100vw';
+    overlay.style.height = '100vh';
+    overlay.style.background = 'radial-gradient(ellipse at 50% 50%, rgba(26,34,56,0.0) 0%, rgba(26,34,56,0.8) 80%, #070a18 100%)';
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity 0.7s cubic-bezier(.34,1.56,.64,1)';
+    overlay.style.zIndex = '1000';
+    document.body.appendChild(overlay);
+    setTimeout(() => { overlay.style.opacity = '1'; }, 200);
+
+    // --- Warp Speed Animation ---
+    // Remove any previous warp canvas
+    let oldWarp = document.getElementById('warp-canvas');
+    if (oldWarp) oldWarp.remove();
+    // Create warp canvas
+    const warpCanvas = document.createElement('canvas');
+    warpCanvas.id = 'warp-canvas';
+    warpCanvas.style.position = 'fixed';
+    warpCanvas.style.left = '0';
+    warpCanvas.style.top = '0';
+    warpCanvas.style.width = '100vw';
+    warpCanvas.style.height = '100vh';
+    warpCanvas.style.pointerEvents = 'none';
+    warpCanvas.style.zIndex = '1100';
+    document.body.appendChild(warpCanvas);
+    // Set canvas size
+    function resizeWarpCanvas() {
+        warpCanvas.width = window.innerWidth;
+        warpCanvas.height = window.innerHeight;
     }
-    // The animateOrbits function will handle the visual changes.
+    resizeWarpCanvas();
+    window.addEventListener('resize', resizeWarpCanvas);
+    // Star streaks
+    const streaks = [];
+    const streakCount = 120;
+    const cx = window.innerWidth/2;
+    const cy = window.innerHeight/2;
+    for (let i = 0; i < streakCount; i++) {
+        const angle = Math.random() * 2 * Math.PI;
+        const speed = 12 + Math.random() * 10;
+        const len = 60 + Math.random() * 80;
+        streaks.push({
+            angle,
+            speed,
+            len,
+            r: 0,
+            width: 1.2 + Math.random()*1.8,
+            color: `rgba(255,255,230,${0.7 + Math.random()*0.3})`
+        });
+    }
+    let warpStart = null;
+    function animateWarp(ts) {
+        if (!warpStart) warpStart = ts;
+        const t = (ts - warpStart) / 1000;
+        const ctx = warpCanvas.getContext('2d');
+        ctx.clearRect(0,0,warpCanvas.width,warpCanvas.height);
+        for (let s of streaks) {
+            // Accelerate outward
+            s.r += s.speed * (1.2 + t*2.5) * (0.7 + t*0.6);
+            const x1 = cx + Math.cos(s.angle) * s.r;
+            const y1 = cy + Math.sin(s.angle) * s.r;
+            const x2 = cx + Math.cos(s.angle) * (s.r + s.len + t*60);
+            const y2 = cy + Math.sin(s.angle) * (s.r + s.len + t*60);
+            ctx.save();
+            ctx.strokeStyle = s.color;
+            ctx.lineWidth = s.width + t*1.2;
+            ctx.shadowColor = '#ffe066';
+            ctx.shadowBlur = 16 + t*24;
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+            ctx.restore();
+        }
+        if (t < 1.2) {
+            requestAnimationFrame(animateWarp);
+        }
+    }
+    requestAnimationFrame(animateWarp);
+
+    setTimeout(() => {
+        overlay.style.opacity = '1';
+        window.location.href = 'facts.html';
+    }, 1200);
 });
 
 // Draw a simple SVG telescope in the center
@@ -417,15 +569,15 @@ document.body.appendChild(telescopeGame);
 
 const facts = [
   'Das Hubble-Teleskop umkreist die Erde in ca. 540 km Höhe.',
-  'Das größte optische Einzelteleskop ist das Gran Telescopio Canarias (10,4 m Spiegel).',
-  'Radioteleskope können so groß wie ein Fußballfeld sein!',
+  'Das grösste optische Einzelteleskop ist das Gran Telescopio Canarias (10,4 m Spiegel).',
+  'Radioteleskope können so gross wie ein Fussballfeld sein!',
   'Galileo baute 1609 sein erstes Teleskop.',
   'Das James Webb Space Telescope sieht Infrarotlicht aus der Frühzeit des Universums.',
   'Einige Teleskope stehen im Weltall, um die Atmosphäre zu umgehen.',
   'Adaptive Optik gleicht Luftunruhe aus und macht Bilder schärfer.',
   'Mit Teleskopen wurden über 5000 Exoplaneten entdeckt.',
   'Das VLT in Chile besteht aus vier 8,2-m-Teleskopen.',
-  'Das Arecibo-Observatorium war das größte Radioteleskop der Welt.'
+  'Das Arecibo-Observatorium war das grösste Radioteleskop der Welt.'
 ];
 const lens = document.getElementById('telescope-lens');
 const factDiv = document.getElementById('telescope-fact');
@@ -792,3 +944,134 @@ randomBtn.onclick = () => {
   openModal(nodes[idx].dataset.topic);
 };
 document.body.appendChild(randomBtn);
+
+// --- Quellen (Sources) Button and Modal ---
+(function() {
+  // Quellen data (add your literature here)
+  const quellen = [
+    {
+      title: 'Bücher & Literatur',
+      items: [
+        'Hoskin, Michael: The Cambridge Illustrated History of Astronomy. Cambridge University Press, 1997.',
+        'King, Henry C.: The History of the Telescope. Dover Publications, 2003.',
+        'Kanipe, Jeff: The Cosmic Connection: How Astronomical Events Impact Life on Earth. Prometheus Books, 2009.'
+      ]
+    },
+    {
+      title: 'Webseiten',
+      items: [
+        'NASA: https://www.nasa.gov/mission_pages/hubble/story/index.html',
+        'ESA: https://www.esa.int/Science_Exploration/Space_Science/Herschel',
+        'Wikipedia: https://de.wikipedia.org/wiki/Teleskop',
+        'Max-Planck-Institut für Astronomie: https://www.mpia.de/de/oeffentlichkeit/astronomische-bilder/teleskope',
+        'ESO: https://www.eso.org/public/germany/teles-instr/'
+      ]
+    }
+  ];
+
+  // Create button
+  const quellenBtn = document.createElement('button');
+  quellenBtn.textContent = 'Quellen';
+  quellenBtn.className = 'quellen-btn';
+  quellenBtn.style.position = 'fixed';
+  quellenBtn.style.top = '24px'; // Top left
+  quellenBtn.style.left = '24px';
+  quellenBtn.style.bottom = '';
+  quellenBtn.style.right = '';
+  quellenBtn.style.zIndex = '1201';
+  quellenBtn.style.background = 'radial-gradient(circle at 60% 40%, #ffe066 70%, #fff 100%)';
+  quellenBtn.style.color = '#4a90e2';
+  quellenBtn.style.fontSize = '1em';
+  quellenBtn.style.fontWeight = 'bold';
+  quellenBtn.style.border = 'none';
+  quellenBtn.style.borderRadius = '1.2em';
+  quellenBtn.style.padding = '0.5em 1.3em';
+  quellenBtn.style.boxShadow = '0 0 16px 4pxrgba(102, 255, 247, 0.53), 0 0 0 4px #4a90e2';
+  quellenBtn.style.cursor = 'pointer';
+  quellenBtn.style.opacity = '0.85';
+  quellenBtn.style.transition = 'opacity 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s';
+  quellenBtn.style.pointerEvents = 'auto';
+  quellenBtn.tabIndex = 0;
+  quellenBtn.onmouseenter = () => {
+    quellenBtn.style.opacity = '1';
+    quellenBtn.style.background = 'radial-gradient(circle at 60% 40%, #fffbe6 70%, #ffe066 100%)';
+    quellenBtn.style.color = '#1a2238';
+    quellenBtn.style.boxShadow = '0 0 32px 8px #ffe066cc, 0 0 0 6px #4a90e2';
+  };
+  quellenBtn.onmouseleave = () => {
+    quellenBtn.style.opacity = '0.85';
+    quellenBtn.style.background = 'radial-gradient(circle at 60% 40%, #ffe066 70%, #fff 100%)';
+    quellenBtn.style.color = '#4a90e2';
+    quellenBtn.style.boxShadow = '0 0 16px 4px #ffe06688, 0 0 0 4px #4a90e2';
+  };
+  document.body.appendChild(quellenBtn);
+
+  // Create modal (hidden by default)
+  const quellenModal = document.createElement('div');
+  quellenModal.className = 'quellen-modal hidden';
+  quellenModal.style.position = 'fixed';
+  quellenModal.style.left = '0';
+  quellenModal.style.top = '0';
+  quellenModal.style.width = '100vw';
+  quellenModal.style.height = '100vh';
+  quellenModal.style.background = 'rgba(26,34,56,0.88)';
+  quellenModal.style.zIndex = '1300';
+  quellenModal.style.display = 'flex';
+  quellenModal.style.alignItems = 'center';
+  quellenModal.style.justifyContent = 'center';
+  quellenModal.style.backdropFilter = 'blur(2px)';
+  quellenModal.style.transition = 'opacity 0.3s';
+  quellenModal.style.opacity = '0';
+  quellenModal.innerHTML = `
+    <div class="quellen-content" style="
+      background: linear-gradient(135deg, #2e4a3a 60%, #1a2238 100%); /* darker green-blue gradient */
+      color: #fff;
+      border-radius: 18px;
+      box-shadow: 0 0 28px 8px #3ecf4a, 0 0 0 4px #ffe066; /* green and gold shadow */
+      padding: 2.5rem 2rem 2rem 2rem;
+      min-width: 320px;
+      max-width: 500px;
+      width: 92vw;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      border: none;
+      margin: 0;
+      animation: modalIn 0.4s cubic-bezier(.34,1.56,.64,1);
+      transform-style: preserve-3d;
+      transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease-out;
+      word-break: break-word;
+      white-space: normal;
+    ">
+      <span class="close-btn" style="position:absolute;top:12px;right:18px;font-size:2rem;color:#ffe066;cursor:pointer;opacity:0.7;z-index:20;transition:opacity 0.2s, transform 0.2s;">&times;</span>
+      <h2 style="text-align:center;font-size:2.1rem;color:#ffe066;margin-bottom:1rem;text-shadow:0 2px 8px #000a,0 0 8px #ffe06677;font-weight:800;">Quellen & Literatur</h2>
+      <div style="font-size:1.1rem;line-height:1.6;text-align:left;width:100%;color:#eaf6ff;word-break:break-word;white-space:normal;">
+        ${quellen.map(q => `<b style='color:#ffe066;'>${q.title}</b><ul style='margin-bottom:1em;padding-left:1.2em;'>${q.items.map(item => `<li style='margin-bottom:0.3em;word-break:break-word;white-space:normal;'>${item}</li>`).join('')}</ul>`).join('')}
+      </div>
+    </div>
+  `;
+  document.body.appendChild(quellenModal);
+  // Show/hide logic
+  quellenBtn.onclick = (e) => {
+    e.stopPropagation();
+    quellenModal.classList.remove('hidden');
+    quellenModal.style.opacity = '1';
+    quellenModal.style.pointerEvents = 'auto';
+  };
+  quellenModal.querySelector('.close-btn').onclick = (e) => {
+    e.stopPropagation();
+    quellenModal.classList.add('hidden');
+    quellenModal.style.opacity = '0';
+    quellenModal.style.pointerEvents = 'none';
+  };
+  quellenModal.onclick = (e) => {
+    if (e.target === quellenModal) {
+      quellenModal.classList.add('hidden');
+      quellenModal.style.opacity = '0';
+      quellenModal.style.pointerEvents = 'none';
+    }
+  };
+})();

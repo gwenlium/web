@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teleskop-Fakten</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #23243a 0%, #3a2e5f 60%, #1e466e 100%) !important;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    .fact-window {
+      position: absolute;
+      min-width: 220px;
+      max-width: 320px;
+      background: rgba(34, 40, 60, 0.98);
+      color: #ffe066;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px #000a, 0 0 0 2px #4a90e2aa;
+      padding: 1.2em 1.2em 1em 1.2em;
+      z-index: 10;
+      font-size: 1.1rem;
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: grab;
+      animation: popIn 0.5s cubic-bezier(.34,1.56,.64,1);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .fact-window:active {
+      cursor: grabbing;
+      box-shadow: 0 12px 40px #000c, 0 0 0 3px #ffe066cc;
+      transform: scale(1.04) rotate(-2deg);
+    }
+    .fact-window.floating {
+      animation: floaty 2.5s ease-in-out infinite alternate;
+    }
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.3) translateY(60px); }
+      60% { opacity: 1; transform: scale(1.15) translateY(-10px); }
+      80% { transform: scale(0.95) translateY(2px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes floaty {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(-18px) scale(1.03); }
+    }
+    .back-btn {
+      position: fixed;
+      top: 24px;
+      left: 24px;
+      z-index: 100;
+      background: #ffe066;
+      color: #1a2238;
+      font-weight: bold;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 1.2em;
+      padding: 0.7em 1.5em;
+      box-shadow: 0 2px 12px #0005;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .back-btn:hover {
+      background: #fff6b0;
+      color: #4a90e2;
+    }
+    /* Fade-in effect for facts page */
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    .facts-fadein {
+      animation: fadeIn 1s ease-out forwards;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="starfield"></canvas>
+  <button class="back-btn" onclick="window.location.href='index.html'">Zurück</button>
+  <div id="facts-container"></div>
+  <footer class="watermark">Flashily created by Gwendolyn Erkut, T6b</footer>
+  <script>
+    // Starfield animation (reuse from main page)
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    const STAR_COUNT = 180;
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    function createStars() {
+      stars = [];
+      for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.2 + 0.3,
+          speed: Math.random() * 0.15 + 0.05,
+          alpha: Math.random() * 0.5 + 0.5
+        });
+      }
+    }
+    createStars();
+    function animateStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let star of stars) {
+        ctx.save();
+        ctx.globalAlpha = star.alpha;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.r, 0, 2 * Math.PI);
+        ctx.fillStyle = '#fff';
+        ctx.shadowColor = '#fff';
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.restore();
+        star.y += star.speed * 5;
+        if (star.y > canvas.height) {
+          star.y = 0;
+          star.x = Math.random() * canvas.width;
+        }
+      }
+      requestAnimationFrame(animateStars);
+    }
+    animateStars();
+    // Facts
+    const facts = [
+      'Das Hubble-Teleskop umkreist die Erde in ca. 540 km Höhe.',
+      'Das grösste optische Einzelteleskop ist das Gran Telescopio Canarias (10,4 m Spiegel).',
+      'Radioteleskope können so gross wie ein Fussballfeld sein!',
+      'Galileo baute 1609 sein erstes Teleskop.',
+      'Das James Webb Space Telescope sieht Infrarotlicht aus der Frühzeit des Universums.',
+      'Einige Teleskope stehen im Weltall, um die Atmosphäre zu umgehen.',
+      'Adaptive Optik gleicht Luftunruhe aus und macht Bilder schärfer.',
+      'Mit Teleskopen wurden über 5000 Exoplaneten entdeckt.',
+      'Das VLT in Chile besteht aus vier 8,2-m-Teleskopen.',
+      'Das Arecibo-Observatorium war das grösste Radioteleskop der Welt.'
+    ];
+    // Random positions for floating windows
+    function randomPos(w, h) {
+      const pad = 60;
+      return {
+        left: Math.random() * (window.innerWidth - w - pad*2) + pad,
+        top: Math.random() * (window.innerHeight - h - pad*2) + pad
+      };
+    }
+    function showFacts() {
+      const container = document.getElementById('facts-container');
+      container.innerHTML = '';
+      facts.forEach((fact, i) => {
+        const div = document.createElement('div');
+        div.className = 'fact-window floating';
+        div.textContent = fact;
+        const {left, top} = randomPos(280, 120);
+        div.style.left = left + 'px';
+        div.style.top = top + 'px';
+        // Drag logic
+        let offsetX, offsetY, dragging = false;
+        div.addEventListener('mousedown', function(e) {
+          dragging = true;
+          offsetX = e.clientX - div.offsetLeft;
+          offsetY = e.clientY - div.offsetTop;
+          div.style.zIndex = 1000;
+          div.classList.remove('floating');
+        });
+        document.addEventListener('mousemove', function moveHandler(e) {
+          if (dragging) {
+            div.style.left = (e.clientX - offsetX) + 'px';
+            div.style.top = (e.clientY - offsetY) + 'px';
+          }
+        });
+        document.addEventListener('mouseup', function upHandler() {
+          if (dragging) {
+            dragging = false;
+            div.style.zIndex = 10;
+            div.classList.add('floating');
+          }
+        });
+        container.appendChild(div);
+      });
+    }
+    showFacts();
+    window.addEventListener('resize', showFacts);
+    // On page load, add fade-in class for seamless transition from index.html
+    window.addEventListener('DOMContentLoaded', () => {
+      document.body.classList.add('facts-fadein');
+
+      // --- Big Bang scatter for initial fact windows ---
+      const factWindows = document.querySelectorAll('.fact-window');
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      factWindows.forEach((win, i) => {
+        win.style.position = 'fixed';
+        win.style.left = centerX - win.offsetWidth / 2 + 'px';
+        win.style.top = centerY - win.offsetHeight / 2 + 'px';
+        win.style.opacity = '0';
+        win.style.transition = 'none';
+      });
+      setTimeout(() => {
+        factWindows.forEach((win, i) => {
+          const angle = Math.random() * 2 * Math.PI;
+          const maxDistX = (window.innerWidth / 2) - win.offsetWidth - 32;
+          const maxDistY = (window.innerHeight / 2) - win.offsetHeight - 32;
+          const dist = Math.random() * 0.5 + 0.5;
+          const dx = Math.cos(angle) * maxDistX * dist;
+          const dy = Math.sin(angle) * maxDistY * dist;
+          const finalLeft = centerX - win.offsetWidth / 2 + dx;
+          const finalTop = centerY - win.offsetHeight / 2 + dy;
+          win.style.transition = 'left 0.55s cubic-bezier(.7,0,.3,1), top 0.55s cubic-bezier(.7,0,.3,1), opacity 0.38s cubic-bezier(.7,0,.3,1)';
+          win.style.left = Math.max(16, Math.min(window.innerWidth - win.offsetWidth - 16, finalLeft)) + 'px';
+          win.style.top = Math.max(16, Math.min(window.innerHeight - win.offsetHeight - 16, finalTop)) + 'px';
+          win.style.opacity = '1';
+        });
+      }, 80);
+
+      // --- Improved drag: instant, no lag ---
+      let dragWin = null, dragOffsetX = 0, dragOffsetY = 0;
+      factWindows.forEach(win => {
+        win.addEventListener('mousedown', e => {
+          dragWin = win;
+          dragOffsetX = e.clientX - win.offsetLeft;
+          dragOffsetY = e.clientY - win.offsetTop;
+          win.style.transition = 'none';
+          win.style.zIndex = 2000;
+          document.body.style.userSelect = 'none';
+        });
+      });
+      document.addEventListener('mousemove', e => {
+        if (!dragWin) return;
+        dragWin.style.left = (e.clientX - dragOffsetX) + 'px';
+        dragWin.style.top = (e.clientY - dragOffsetY) + 'px';
+      });
+      document.addEventListener('mouseup', () => {
+        if (dragWin) {
+          dragWin.style.zIndex = '';
+          document.body.style.userSelect = '';
+          dragWin = null;
+        }
+      });
+
+      // --- Fun: spawn more floating windows every second ---
+      let allFacts = Array.from(factWindows).map(win => win.innerHTML);
+      let spawned = factWindows.length;
+      function spawnFactWindow() {
+        if (spawned >= allFacts.length * 3) return; // Limit to 3x original count
+        // Pick a random fact (cycling through)
+        const factIdx = spawned % allFacts.length;
+        const win = document.createElement('div');
+        win.className = 'fact-window';
+        win.innerHTML = allFacts[factIdx];
+        win.style.position = 'fixed';
+        win.style.left = centerX - 120 + 'px';
+        win.style.top = centerY - 60 + 'px';
+        win.style.opacity = '0';
+        win.style.transition = 'none';
+        document.body.appendChild(win);
+        setTimeout(() => {
+          const angle = Math.random() * 2 * Math.PI;
+          const maxDistX = (window.innerWidth / 2) - 120 - 32;
+          const maxDistY = (window.innerHeight / 2) - 60 - 32;
+          const dist = Math.random() * 0.5 + 0.5;
+          const dx = Math.cos(angle) * maxDistX * dist;
+          const dy = Math.sin(angle) * maxDistY * dist;
+          const finalLeft = centerX - 120 + dx;
+          const finalTop = centerY - 60 + dy;
+          win.style.transition = 'left 0.55s cubic-bezier(.7,0,.3,1), top 0.55s cubic-bezier(.7,0,.3,1), opacity 0.38s cubic-bezier(.7,0,.3,1)';
+          win.style.left = Math.max(16, Math.min(window.innerWidth - 240 - 16, finalLeft)) + 'px';
+          win.style.top = Math.max(16, Math.min(window.innerHeight - 120 - 16, finalTop)) + 'px';
+          win.style.opacity = '1';
+        }, 80);
+        // Make draggable
+        win.addEventListener('mousedown', e => {
+          dragWin = win;
+          dragOffsetX = e.clientX - win.offsetLeft;
+          dragOffsetY = e.clientY - win.offsetTop;
+          win.style.transition = 'none';
+          win.style.zIndex = 2000;
+          document.body.style.userSelect = 'none';
+        });
+        spawned++;
+      }
+      setInterval(spawnFactWindow, 1000);
+    });
+    // --- More telescope facts for the floating windows ---
+    const moreFacts = [
+      'Das erste bekannte Fernrohr wurde 1608 von Hans Lippershey gebaut.',
+      'Das Hubble-Teleskop hat über 1,5 Millionen Beobachtungen gemacht.',
+      'Das James Webb Space Telescope kann bis zu 13,6 Milliarden Lichtjahre weit sehen.',
+      'Radioteleskope wie das FAST in China haben einen Durchmesser von 500 Metern.',
+      'Das Very Large Telescope (VLT) in Chile besteht aus vier 8,2-Meter-Spiegeln.',
+      'Adaptive Optik ermöglicht bodengebundenen Teleskopen, schärfere Bilder zu liefern.',
+      'Das Keck-Observatorium nutzt segmentierte Spiegel für eine größere Öffnung.',
+      'Das Arecibo-Observatorium war bis 2020 das größte Radioteleskop der Welt.',
+      'Das Event Horizon Telescope hat das erste Bild eines Schwarzen Lochs aufgenommen.',
+      'Das Gran Telescopio Canarias ist das größte optische Einzelteleskop.',
+      'Teleskope können verschiedene Wellenlängenbereiche beobachten: Radio, Infrarot, UV, Röntgen und Gamma.',
+      'Das Spitzer-Teleskop war auf Infrarotbeobachtungen spezialisiert.',
+      'Das Chandra-Teleskop beobachtet das Universum im Röntgenbereich.',
+      'Das Hubble-Teleskop wurde 5-mal im All gewartet und repariert.',
+      'Mit Teleskopen wurden über 5000 Exoplaneten entdeckt.',
+      'Das JWST hat einen goldbeschichteten Hauptspiegel mit 6,5 Metern Durchmesser.',
+      'Das VLT kann als Interferometer betrieben werden und so extrem hohe Auflösung erreichen.',
+      'Das Hubble Deep Field Bild zeigt Tausende Galaxien in einem winzigen Himmelsausschnitt.',
+      'Das erste Spiegelteleskop wurde von Isaac Newton gebaut.',
+      'Das Square Kilometre Array (SKA) wird das größte Radioteleskop der Welt sein.'
+    ];
+    // If you have a facts array, merge these in for more variety
+    if (typeof facts !== 'undefined' && Array.isArray(facts)) {
+      facts.push(...moreFacts);
+    }
+  </script>
+</body>
+</html>
