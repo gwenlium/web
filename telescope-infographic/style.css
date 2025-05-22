@@ -89,54 +89,37 @@ body {
   color: #1a2238;
 }
 
-.topic-orb[data-topic="invention"] { left: 50%; top: 12%; transform: translate(-50%, 0); }
-.topic-orb[data-topic="inventor"] { left: 80%; top: 30%; }
-.topic-orb[data-topic="purpose"] { left: 80%; top: 65%; }
-.topic-orb[data-topic="achievements"] { left: 50%; top: 85%; transform: translate(-50%, 0); }
-.topic-orb[data-topic="facts"] { left: 20%; top: 65%; }
-.topic-orb[data-topic="types"] { left: 20%; top: 30%; }
-.topic-orb[data-topic="how"] { left: 10%; top: 50%; }
-.topic-orb[data-topic="famous"] { left: 90%; top: 50%; }
-
-.topic-orb[data-topic="invention"]::before {
-  content: url('assets/lightbulb.svg');
-  display: block;
-  margin-bottom: 6px;
+.topic-orb[data-topic="invention"] {
+  background: radial-gradient(circle at 60% 40%, #ffe066 60%, #f7c873 100%); /* Sun (yellow) */
+  color: #1a2238;
 }
-.topic-orb[data-topic="inventor"]::before {
-  content: url('assets/scientist.svg');
-  display: block;
-  margin-bottom: 6px;
+.topic-orb[data-topic="inventor"] {
+  background: radial-gradient(circle at 60% 40%, #b0b0b0 60%, #e0e0e0 100%); /* Mercury (gray) */
+  color: #1a2238;
 }
-.topic-orb[data-topic="purpose"]::before {
-  content: url('assets/question.svg');
-  display: block;
-  margin-bottom: 6px;
+.topic-orb[data-topic="purpose"] {
+  background: radial-gradient(circle at 60% 40%, #f4a460 60%, #e97451 100%); /* Venus (tan/orange) */
+  color: #1a2238;
 }
-.topic-orb[data-topic="achievements"]::before {
-  content: url('assets/star.svg');
-  display: block;
-  margin-bottom: 6px;
+.topic-orb[data-topic="achievements"] {
+  background: radial-gradient(circle at 60% 40%, #4a90e2 60%, #1a2238 100%); /* Earth (blue) */
+  color: #fff;
 }
-.topic-orb[data-topic="facts"]::before {
-  content: url('assets/atom.svg');
-  display: block;
-  margin-bottom: 6px;
+.topic-orb[data-topic="facts"] {
+  background: radial-gradient(circle at 60% 40%, #e2725b 60%, #b22222 100%); /* Mars (red) */
+  color: #fff;
 }
-.topic-orb[data-topic="types"]::before {
-  content: url('assets/lens.svg');
-  display: block;
-  margin-bottom: 6px;
+.topic-orb[data-topic="types"] {
+  background: radial-gradient(circle at 60% 40%, #f7e7b6 60%, #e3c16f 100%); /* Jupiter (beige/yellow) */
+  color: #1a2238;
 }
-.topic-orb[data-topic="how"]::before {
-  content: url('assets/diagram.svg');
-  display: block;
-  margin-bottom: 6px;
+.topic-orb[data-topic="how"] {
+  background: radial-gradient(circle at 60% 40%, #c2b280 60%, #bdb76b 100%); /* Saturn (pale gold) */
+  color: #1a2238;
 }
-.topic-orb[data-topic="famous"]::before {
-  content: url('assets/telescope.svg');
-  display: block;
-  margin-bottom: 6px;
+.topic-orb[data-topic="famous"] {
+  background: radial-gradient(circle at 60% 40%, #7ec0ee 60%, #4682b4 100%); /* Uranus (light blue) */
+  color: #fff;
 }
 
 /* Modal styles */
@@ -585,4 +568,44 @@ body {
   100% { opacity: 0; transform: scaleX(1.5) rotate(var(--angle,0deg)); }
 }
 
-/* ...existing code... */
+.star-node[data-topic="geschichte"] {
+  background: radial-gradient(circle at 60% 40%, #ffe066 60%, #f7c873 100%);
+  color: #1a2238;
+  box-shadow: 0 0 30px 8px #ffe066, 0 0 0 6px #f7c873;
+}
+.star-node[data-topic="erfinder"] {
+  background: radial-gradient(circle at 60% 40%, #b0b0b0 60%, #e0e0e0 100%);
+  color: #1a2238;
+  box-shadow: 0 0 30px 8px #b0b0b0, 0 0 0 6px #e0e0e0;
+}
+.star-node[data-topic="zweck"] {
+  background: radial-gradient(circle at 60% 40%, #f4a460 60%, #e97451 100%);
+  color: #1a2238;
+  box-shadow: 0 0 30px 8px #e97451, 0 0 0 6px #f4a460;
+}
+.star-node[data-topic="entdeckungen"] {
+  background: radial-gradient(circle at 60% 40%, #4a90e2 60%, #1a2238 100%);
+  color: #fff;
+  box-shadow: 0 0 30px 8px #4a90e2, 0 0 0 6px #1a2238;
+}
+.star-node[data-topic="physik"] {
+  background: radial-gradient(circle at 60% 40%, #e2725b 60%, #b22222 100%);
+  color: #fff;
+  box-shadow: 0 0 30px 8px #b22222, 0 0 0 6px #e2725b;
+}
+.star-node[data-topic="typen"] {
+  background: radial-gradient(circle at 60% 40%, #b6f7d7 60%, #e3c16f 100%);
+  color: #1a2238;
+  box-shadow: 0 0 30px 8px #e3c16f, 0 0 0 6px #f7e7b6;
+}
+.star-node[data-topic="funktion"] {
+  background: radial-gradient(circle at 60% 40%, #7be87b 60%, #228b22 100%);
+  color: #1a2238;
+  box-shadow: 0 0 30px 8px #228b22, 0 0 0 6px #7be87b;
+}
+.star-node[data-topic="beruehmt"] {
+  background: radial-gradient(circle at 60% 40%, #4166f5 60%, #243a6b 100%);
+  color: #fff;
+  box-shadow: 0 0 30px 8px #4166f5, 0 0 0 6px #243a6b;
+}
+
