@@ -823,6 +823,35 @@ function shootingStar() {
 }
 setInterval(() => { if (Math.random() < 0.25) shootingStar(); }, 2000);
 
+// --- Space Emoji Particles ---
+const spaceEmojis = ['🌟','🪐','🚀','🌙','👽','🛰️','☄️','🌌','🔭','🛸'];
+function spawnEmojiParticle() {
+  const emoji = document.createElement('div');
+  emoji.textContent = spaceEmojis[Math.floor(Math.random() * spaceEmojis.length)];
+  emoji.style.position = 'fixed';
+  emoji.style.left = Math.random() * window.innerWidth + 'px';
+  emoji.style.top = (Math.random() * 0.8 + 0.05) * window.innerHeight + 'px';
+  emoji.style.fontSize = (28 + Math.random() * 22) + 'px';
+  emoji.style.opacity = '0.82';
+  emoji.style.pointerEvents = 'none';
+  emoji.style.zIndex = '2';
+  emoji.style.transition = 'transform 2.5s linear, opacity 2.5s linear';
+  emoji.style.filter = 'drop-shadow(0 0 8px #ffe06688)';
+  document.body.appendChild(emoji);
+  // Animate: drift up and fade out, with a little horizontal movement
+  const driftX = (Math.random() - 0.5) * 120;
+  const driftY = -120 - Math.random() * 80;
+  setTimeout(() => {
+    emoji.style.transform = `translate(${driftX}px, ${driftY}px) scale(${0.7 + Math.random()*0.6})`;
+    emoji.style.opacity = '0';
+  }, 60);
+  setTimeout(() => emoji.remove(), 2600);
+}
+// Spawn emoji particles at random intervals (average every 1.5s, but not all at once)
+setInterval(() => {
+  if (Math.random() < 0.7) spawnEmojiParticle();
+}, 1500);
+
 // 3. Planet Hover Effects: Grow, Glow, Tooltip
 nodes.forEach((node, i) => {
   node.addEventListener('mouseenter', () => {
