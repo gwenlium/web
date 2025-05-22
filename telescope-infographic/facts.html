@@ -33,7 +33,6 @@
     .fact-window:active {
       cursor: grabbing;
       box-shadow: 0 12px 40px #000c, 0 0 0 3px #ffe066cc;
-      transform: scale(1.04) rotate(-2deg);
     }
     .fact-window.floating {
       animation: floaty 2.5s ease-in-out infinite alternate;
@@ -76,6 +75,47 @@
     .facts-fadein {
       animation: fadeIn 1s ease-out forwards;
     }
+    .facts-action-btn {
+      font-size: 1.1em;
+      padding: 0.7em 1.5em;
+      border-radius: 1.2em;
+      background: #ffe066;
+      color: #1a2238;
+      font-weight: bold;
+      box-shadow: 0 0 16px #ffe06688;
+      cursor: pointer;
+      border: none;
+      margin: 0.5em 0;
+      transition: background 0.2s, color 0.2s, transform 0.2s;
+    }
+    .facts-action-btn:hover, .facts-action-btn:focus {
+      background: #fff6b0;
+      color: #4a90e2;
+      transform: scale(1.07);
+      outline: none;
+    }
+    .fact-window .close-btn {
+      position: absolute;
+      top: 8px;
+      right: 14px;
+      cursor: pointer;
+      font-size: 1.3em;
+      color: #ffe066;
+      opacity: 0.85;
+      background: none;
+      border: none;
+      z-index: 10;
+      transition: opacity 0.2s, color 0.2s;
+      padding: 0 0.2em;
+      line-height: 1;
+      border-radius: 50%;
+    }
+    .fact-window .close-btn:hover, .fact-window .close-btn:focus {
+      opacity: 1;
+      color: #fff6b0;
+      background: #4a90e2;
+      outline: none;
+    }
   </style>
 </head>
 <body>
@@ -87,6 +127,11 @@
     <input id="starfield-speed-slider" type="range" min="3" max="10" step="0.1" value="5" style="width:80px;height:18px;vertical-align:middle;">
     <span id="starfield-speed-value" style="color:#fff;font-weight:bold;font-size:0.95em;margin-left:0.2em;">5.0x</span>
   </div>
+  <div id="show-all-again-container" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2000;text-align:center;">
+    <button id="show-all-again-btn" class="facts-action-btn">Alle Fakten erneut anzeigen</button>
+    <div style="margin-top:1em;color:#ffe066;font-size:1.1em;">Alle Fakten wurden angezeigt! 🎉</div>
+  </div>
+  <button id="randomize-facts-btn" class="facts-action-btn" style="position:fixed;top:24px;right:24px;z-index:100;">Randomisieren</button>
   <footer class="watermark">Flashily created by Gwendolyn Erkut, T6b</footer>
   <script>
     // Starfield animation (reuse from main page)
@@ -164,7 +209,7 @@
       if (Math.random() < 0.7) spawnEmojiParticle();
     }, 1500);
 
-    // Facts
+    // --- Improved Fact Windows System with Randomize ---
     let facts = [
       'Das Hubble-Teleskop umkreist die Erde in ca. 540 km Höhe.',
       'Das grösste optische Einzelteleskop ist das Gran Telescopio Canarias (10,4 m Spiegel).',
@@ -175,10 +220,7 @@
       'Adaptive Optik gleicht Luftunruhe aus und macht Bilder schärfer.',
       'Mit Teleskopen wurden über 5000 Exoplaneten entdeckt.',
       'Das VLT in Chile besteht aus vier 8,2-m-Teleskopen.',
-      'Das Arecibo-Observatorium war das grösste Radioteleskop der Welt.'
-    ];
-    // --- More telescope facts for the floating windows ---
-    const moreFacts = [
+      'Das Arecibo-Observatorium war das grösste Radioteleskop der Welt.',
       'Das erste bekannte Fernrohr wurde 1608 von Hans Lippershey gebaut.',
       'Das Hubble-Teleskop hat über 1,5 Millionen Beobachtungen gemacht.',
       'Das James Webb Space Telescope kann bis zu 13,6 Milliarden Lichtjahre weit sehen.',
@@ -186,178 +228,152 @@
       'Das Very Large Telescope (VLT) in Chile besteht aus vier 8,2-Meter-Spiegeln.',
       'Adaptive Optik ermöglicht bodengebundenen Teleskopen, schärfere Bilder zu liefern.',
       'Das Keck-Observatorium nutzt segmentierte Spiegel für eine größere Öffnung.',
-      'Das Arecibo-Observatorium war bis 2020 das größte Radioteleskop der Welt.',
       'Das Event Horizon Telescope hat das erste Bild eines Schwarzen Lochs aufgenommen.',
       'Das Gran Telescopio Canarias ist das größte optische Einzelteleskop.',
       'Teleskope können verschiedene Wellenlängenbereiche beobachten: Radio, Infrarot, UV, Röntgen und Gamma.',
       'Das Spitzer-Teleskop war auf Infrarotbeobachtungen spezialisiert.',
       'Das Chandra-Teleskop beobachtet das Universum im Röntgenbereich.',
       'Das Hubble-Teleskop wurde 5-mal im All gewartet und repariert.',
-      'Mit Teleskopen wurden über 5000 Exoplaneten entdeckt.',
       'Das JWST hat einen goldbeschichteten Hauptspiegel mit 6,5 Metern Durchmesser.',
       'Das VLT kann als Interferometer betrieben werden und so extrem hohe Auflösung erreichen.',
       'Das Hubble Deep Field Bild zeigt Tausende Galaxien in einem winzigen Himmelsausschnitt.',
       'Das erste Spiegelteleskop wurde von Isaac Newton gebaut.',
       'Das Square Kilometre Array (SKA) wird das größte Radioteleskop der Welt sein.'
     ];
-    // Merge and deduplicate facts
-    facts = Array.from(new Set([...facts, ...moreFacts]));
-
-    // Random positions for floating windows
-    function randomPos(w, h) {
-      const pad = 60;
-      return {
-        left: Math.random() * (window.innerWidth - w - pad*2) + pad,
-        top: Math.random() * (window.innerHeight - h - pad*2) + pad
-      };
+    // Remove duplicates
+    facts = Array.from(new Set(facts));
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
     }
-    function showFacts() {
+    let shuffledFacts = shuffle([...facts]);
+    let shownIndices = new Set();
+    const MAX_VISIBLE = 5;
+    function showFactWindows() {
       const container = document.getElementById('facts-container');
       container.innerHTML = '';
-      facts.forEach((fact, i) => {
-        const div = document.createElement('div');
-        div.className = 'fact-window floating';
-        div.textContent = fact;
-        const {left, top} = randomPos(280, 120);
-        div.style.left = left + 'px';
-        div.style.top = top + 'px';
-        // Drag logic
-        let offsetX, offsetY, dragging = false;
-        div.addEventListener('mousedown', function(e) {
-          dragging = true;
-          offsetX = e.clientX - div.offsetLeft;
-          offsetY = e.clientY - div.offsetTop;
-          div.style.zIndex = 1000;
-          div.classList.remove('floating');
-        });
-        document.addEventListener('mousemove', function moveHandler(e) {
-          if (dragging) {
-            div.style.left = (e.clientX - offsetX) + 'px';
-            div.style.top = (e.clientY - offsetY) + 'px';
+      let visible = 0;
+      for (let i = 0; i < shuffledFacts.length && visible < MAX_VISIBLE; i++) {
+        if (!shownIndices.has(i)) {
+          createFactWindow(i);
+          visible++;
+        }
+      }
+      checkAllShown();
+    }
+    function createFactWindow(idx) {
+      const container = document.getElementById('facts-container');
+      const div = document.createElement('div');
+      div.className = 'fact-window floating';
+      // Animate in from center
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      div.style.position = 'fixed';
+      div.style.left = centerX - 140 + 'px';
+      div.style.top = centerY - 70 + 'px';
+      div.style.opacity = '0';
+      div.style.transition = 'none';
+      div.textContent = shuffledFacts[idx];
+      // Dismiss button
+      const closeBtn = document.createElement('button');
+      closeBtn.innerHTML = '✖';
+      closeBtn.className = 'close-btn';
+      closeBtn.setAttribute('aria-label', 'Fakt schließen');
+      closeBtn.onclick = (e) => {
+        e.stopPropagation();
+        div.remove();
+        shownIndices.add(idx);
+        // Show a random available fact if any
+        let visible = document.querySelectorAll('.fact-window').length;
+        // Find all indices not shown and not currently visible
+        let visibleIndices = Array.from(document.querySelectorAll('.fact-window')).map(win => win.getAttribute('data-fact-idx')).filter(x => x !== null).map(Number);
+        let available = [];
+        for (let i = 0; i < shuffledFacts.length; i++) {
+          if (!shownIndices.has(i) && !visibleIndices.includes(i)) {
+            available.push(i);
           }
-        });
-        document.addEventListener('mouseup', function upHandler() {
+        }
+        if (available.length > 0 && visible < MAX_VISIBLE) {
+          // Pick a random available index
+          const randomIdx = available[Math.floor(Math.random() * available.length)];
+          createFactWindow(randomIdx);
+        }
+        checkAllShown();
+      };
+      div.appendChild(closeBtn);
+      div.setAttribute('data-fact-idx', idx);
+      // Animate to random position
+      setTimeout(() => {
+        const pad = 60;
+        const w = 280, h = 120;
+        const angle = Math.random() * 2 * Math.PI;
+        const maxDistX = (window.innerWidth / 2) - w - 32;
+        const maxDistY = (window.innerHeight / 2) - h - 32;
+        const dist = Math.random() * 0.5 + 0.5;
+        const dx = Math.cos(angle) * maxDistX * dist;
+        const dy = Math.sin(angle) * maxDistY * dist;
+        const finalLeft = centerX - w/2 + dx;
+        const finalTop = centerY - h/2 + dy;
+        div.style.transition = 'left 0.55s cubic-bezier(.7,0,.3,1), top 0.55s cubic-bezier(.7,0,.3,1), opacity 0.38s cubic-bezier(.7,0,.3,1)';
+        div.style.left = Math.max(16, Math.min(window.innerWidth - w - 16, finalLeft)) + 'px';
+        div.style.top = Math.max(16, Math.min(window.innerHeight - h - 16, finalTop)) + 'px';
+        div.style.opacity = '1';
+      }, 60);
+      // Drag logic (per window, no global listeners)
+      let offsetX, offsetY, dragging = false;
+      div.addEventListener('mousedown', function(e) {
+        if (e.target === closeBtn) return;
+        dragging = true;
+        offsetX = e.clientX - div.offsetLeft;
+        offsetY = e.clientY - div.offsetTop;
+        div.style.zIndex = 1000;
+        div.classList.remove('floating');
+        // Disable transitions during drag for less lag
+        const prevTransition = div.style.transition;
+        div.style.transition = 'none';
+        function onMove(ev) {
+          if (!dragging) return;
+          div.style.left = (ev.clientX - offsetX) + 'px';
+          div.style.top = (ev.clientY - offsetY) + 'px';
+        }
+        function onUp() {
           if (dragging) {
             dragging = false;
             div.style.zIndex = 10;
             div.classList.add('floating');
+            div.style.transition = prevTransition;
+            window.removeEventListener('mousemove', onMove);
+            window.removeEventListener('mouseup', onUp);
           }
-        });
-        container.appendChild(div);
+        }
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
       });
+      container.appendChild(div);
     }
-    showFacts();
-    window.addEventListener('resize', showFacts);
-    // On page load, add fade-in class for seamless transition from index.html
-    window.addEventListener('DOMContentLoaded', () => {
-      document.body.classList.add('facts-fadein');
-
-      // --- Big Bang scatter for initial fact windows ---
-      const factWindows = document.querySelectorAll('.fact-window');
-      const centerX = window.innerWidth / 2;
-      const centerY = window.innerHeight / 2;
-      factWindows.forEach((win, i) => {
-        win.style.position = 'fixed';
-        win.style.left = centerX - win.offsetWidth / 2 + 'px';
-        win.style.top = centerY - win.offsetHeight / 2 + 'px';
-        win.style.opacity = '0';
-        win.style.transition = 'none';
-      });
-      setTimeout(() => {
-        factWindows.forEach((win, i) => {
-          const angle = Math.random() * 2 * Math.PI;
-          const maxDistX = (window.innerWidth / 2) - win.offsetWidth - 32;
-          const maxDistY = (window.innerHeight / 2) - win.offsetHeight - 32;
-          const dist = Math.random() * 0.5 + 0.5;
-          const dx = Math.cos(angle) * maxDistX * dist;
-          const dy = Math.sin(angle) * maxDistY * dist;
-          const finalLeft = centerX - win.offsetWidth / 2 + dx;
-          const finalTop = centerY - win.offsetHeight / 2 + dy;
-          win.style.transition = 'left 0.55s cubic-bezier(.7,0,.3,1), top 0.55s cubic-bezier(.7,0,.3,1), opacity 0.38s cubic-bezier(.7,0,.3,1)';
-          win.style.left = Math.max(16, Math.min(window.innerWidth - win.offsetWidth - 16, finalLeft)) + 'px';
-          win.style.top = Math.max(16, Math.min(window.innerHeight - win.offsetHeight - 16, finalTop)) + 'px';
-          win.style.opacity = '1';
-        });
-      }, 80);
-
-      // --- Improved drag: instant, no lag ---
-      let dragWin = null, dragOffsetX = 0, dragOffsetY = 0;
-      factWindows.forEach(win => {
-        win.addEventListener('mousedown', e => {
-          dragWin = win;
-          dragOffsetX = e.clientX - win.offsetLeft;
-          dragOffsetY = e.clientY - win.offsetTop;
-          win.style.transition = 'none';
-          win.style.zIndex = 2000;
-          document.body.style.userSelect = 'none';
-        });
-      });
-      document.addEventListener('mousemove', e => {
-        if (!dragWin) return;
-        dragWin.style.left = (e.clientX - dragOffsetX) + 'px';
-        dragWin.style.top = (e.clientY - dragOffsetY) + 'px';
-      });
-      document.addEventListener('mouseup', () => {
-        if (dragWin) {
-          dragWin.style.zIndex = '';
-          document.body.style.userSelect = '';
-          dragWin = null;
-        }
-      });
-
-      // --- Fun: spawn more floating windows every second ---
-      let spawned = factWindows.length;
-      let usedFactIndices = new Set([...Array(facts.length).keys()].slice(0, spawned));
-      function spawnFactWindow() {
-        if (spawned >= facts.length * 3) return; // Limit to 3x unique facts
-        // Find next unused fact index
-        let nextIdx = -1;
-        for (let i = 0; i < facts.length; i++) {
-          // Only allow up to 3 windows per fact
-          let count = Array.from(document.querySelectorAll('.fact-window')).filter(w => w.textContent === facts[i]).length;
-          if (count < 3) {
-            nextIdx = i;
-            break;
-          }
-        }
-        if (nextIdx === -1) return; // All facts at max
-        const fact = facts[nextIdx];
-        const win = document.createElement('div');
-        win.className = 'fact-window';
-        win.textContent = fact;
-        win.style.position = 'fixed';
-        win.style.left = centerX - 120 + 'px';
-        win.style.top = centerY - 60 + 'px';
-        win.style.opacity = '0';
-        win.style.transition = 'none';
-        document.body.appendChild(win);
-        setTimeout(() => {
-          const angle = Math.random() * 2 * Math.PI;
-          const maxDistX = (window.innerWidth / 2) - 120 - 32;
-          const maxDistY = (window.innerHeight / 2) - 60 - 32;
-          const dist = Math.random() * 0.5 + 0.5;
-          const dx = Math.cos(angle) * maxDistX * dist;
-          const dy = Math.sin(angle) * maxDistY * dist;
-          const finalLeft = centerX - 120 + dx;
-          const finalTop = centerY - 60 + dy;
-          win.style.transition = 'left 0.55s cubic-bezier(.7,0,.3,1), top 0.55s cubic-bezier(.7,0,.3,1), opacity 0.38s cubic-bezier(.7,0,.3,1)';
-          win.style.left = Math.max(16, Math.min(window.innerWidth - 240 - 16, finalLeft)) + 'px';
-          win.style.top = Math.max(16, Math.min(window.innerHeight - 120 - 16, finalTop)) + 'px';
-          win.style.opacity = '1';
-        }, 80);
-        // Make draggable
-        win.addEventListener('mousedown', e => {
-          dragWin = win;
-          dragOffsetX = e.clientX - win.offsetLeft;
-          dragOffsetY = e.clientY - win.offsetTop;
-          win.style.transition = 'none';
-          win.style.zIndex = 2000;
-          document.body.style.userSelect = 'none';
-        });
-        spawned++;
+    function checkAllShown() {
+      const again = document.getElementById('show-all-again-container');
+      if (shownIndices.size >= shuffledFacts.length) {
+        again.style.display = 'block';
+      } else {
+        again.style.display = 'none';
       }
-      setInterval(spawnFactWindow, 1000);
-    });
+    }
+    document.getElementById('show-all-again-btn').onclick = () => {
+      shownIndices.clear();
+      shuffledFacts = shuffle([...facts]);
+      showFactWindows();
+    };
+    document.getElementById('randomize-facts-btn').onclick = () => {
+      shownIndices.clear();
+      shuffledFacts = shuffle([...facts]);
+      showFactWindows();
+    };
+    window.addEventListener('DOMContentLoaded', showFactWindows);
+    window.addEventListener('resize', showFactWindows);
 
     // Starfield speed slider logic
     const speedSlider = document.getElementById('starfield-speed-slider');
