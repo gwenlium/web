@@ -571,7 +571,7 @@ body {
 .star-node[data-topic="geschichte"] {
   background: radial-gradient(circle at 60% 40%, #ffe066 60%, #f7c873 100%);
   color: #1a2238;
-  box-shadow: 0 0 30px 8px #ffe066, 0 0 0 6px #f7c873;
+  box-shadow: 0 0 30px 8px #ffe066, 0 0 0 6px #f0eeeb;
 }
 .star-node[data-topic="erfinder"] {
   background: radial-gradient(circle at 60% 40%, #b0b0b0 60%, #e0e0e0 100%);
@@ -594,9 +594,9 @@ body {
   box-shadow: 0 0 30px 8px #b22222, 0 0 0 6px #e2725b;
 }
 .star-node[data-topic="typen"] {
-  background: radial-gradient(circle at 60% 40%, #b6f7d7 60%, #e3c16f 100%);
+  background: radial-gradient(circle at 60% 40%, #b6f7d7 60%, #6fe3e3 100%);
   color: #1a2238;
-  box-shadow: 0 0 30px 8px #e3c16f, 0 0 0 6px #f7e7b6;
+  box-shadow: 0 0 30px 8px #6fe3c6, 0 0 0 6px #b6f7ec;
 }
 .star-node[data-topic="funktion"] {
   background: radial-gradient(circle at 60% 40%, #7be87b 60%, #228b22 100%);
