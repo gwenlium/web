@@ -21,6 +21,8 @@ body, html {
   width: 100vw;
   height: 100vh;
   position: relative;
+  perspective: none;
+  transform-style: flat;
   z-index: 1;
 }
 
@@ -44,9 +46,9 @@ body, html {
 }
 
 @keyframes pulse {
-  0% { box-shadow: 0 0 40px 10px #ffe066, 0 0 0 8px #1a2238; } /* Adjusted pulse color to match border */
-  50% { box-shadow: 0 0 60px 20px #ffe066, 0 0 0 12px #1a2238; } /* Adjusted pulse color */
-  100% { box-shadow: 0 0 40px 10px #ffe066, 0 0 0 8px #1a2238; } /* Adjusted pulse color */
+  0% { box-shadow: 0 0 40px 10px #4a90e2, 0 0 0 8px #1a2238; }
+  50% { box-shadow: 0 0 60px 20px #4a90e2, 0 0 0 12px #1a2238; }
+  100% { box-shadow: 0 0 40px 10px #4a90e2, 0 0 0 8px #1a2238; }
 }
 
 .topic-orb {
@@ -63,10 +65,9 @@ body, html {
   font-weight: bold;
   box-shadow: 0 0 20px 4px #4a90e2;
   cursor: pointer;
-  /* opacity: 0.92; // Opacity will be controlled by JS */
-  transition: transform 0.3s ease-out, box-shadow 0.3s ease-out, opacity 0.5s ease-out; /* Added opacity transition */
+  opacity: 0.92;
+  transition: transform 0.2s, box-shadow 0.2s;
   user-select: none;
-  z-index: 3; /* Ensure orbs are above orbit lines but below modal and connecting line */
 }
 .topic-orb:hover {
   transform: scale(1.12) rotate(-3deg);
@@ -75,46 +76,51 @@ body, html {
   color: #1a2238;
 }
 
-/* Removed fixed positioning for topic-orbs as they are now dynamically positioned by JS */
-/* .topic-orb[data-topic="invention"] { left: 50%; top: 12%; transform: translate(-50%, 0); } */
-/* ... other similar selectors removed ... */
+.topic-orb[data-topic="invention"] { left: 50%; top: 12%; transform: translate(-50%, 0); }
+.topic-orb[data-topic="inventor"] { left: 80%; top: 30%; }
+.topic-orb[data-topic="purpose"] { left: 80%; top: 65%; }
+.topic-orb[data-topic="achievements"] { left: 50%; top: 85%; transform: translate(-50%, 0); }
+.topic-orb[data-topic="facts"] { left: 20%; top: 65%; }
+.topic-orb[data-topic="types"] { left: 20%; top: 30%; }
+.topic-orb[data-topic="how"] { left: 10%; top: 50%; }
+.topic-orb[data-topic="famous"] { left: 90%; top: 50%; }
 
-.topic-orb[data-topic="geschichte"]::before { /* Updated data-topic name */
-  content: url('assets/history.svg'); /* Placeholder - ensure this icon exists or update */
+.topic-orb[data-topic="invention"]::before {
+  content: url('assets/lightbulb.svg');
   display: block;
   margin-bottom: 6px;
 }
-.topic-orb[data-topic="erfinder"]::before { /* Updated data-topic name */
+.topic-orb[data-topic="inventor"]::before {
   content: url('assets/scientist.svg');
   display: block;
   margin-bottom: 6px;
 }
-.topic-orb[data-topic="zweck"]::before { /* Updated data-topic name */
+.topic-orb[data-topic="purpose"]::before {
   content: url('assets/question.svg');
   display: block;
   margin-bottom: 6px;
 }
-.topic-orb[data-topic="entdeckungen"]::before { /* Updated data-topic name */
+.topic-orb[data-topic="achievements"]::before {
   content: url('assets/star.svg');
   display: block;
   margin-bottom: 6px;
 }
-.topic-orb[data-topic="physik"]::before { /* Updated data-topic name */
+.topic-orb[data-topic="facts"]::before {
   content: url('assets/atom.svg');
   display: block;
   margin-bottom: 6px;
 }
-.topic-orb[data-topic="typen"]::before { /* Updated data-topic name */
+.topic-orb[data-topic="types"]::before {
   content: url('assets/lens.svg');
   display: block;
   margin-bottom: 6px;
 }
-.topic-orb[data-topic="funktion"]::before { /* Updated data-topic name */
+.topic-orb[data-topic="how"]::before {
   content: url('assets/diagram.svg');
   display: block;
   margin-bottom: 6px;
 }
-.topic-orb[data-topic="beruehmt"]::before { /* Updated data-topic name */
+.topic-orb[data-topic="famous"]::before {
   content: url('assets/telescope.svg');
   display: block;
   margin-bottom: 6px;
@@ -301,17 +307,8 @@ body, html {
   filter: drop-shadow(0 0 8px #ffe06688);
 }
 
-/* Orbit SVG styles - already handled by JS, but good to have a base if needed */
 #orbit-svg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none;
-    z-index: 0; /* Behind orbs */
-    opacity: 0.7; /* Default opacity, can be overridden by JS */
-    transition: opacity 0.5s ease-out; /* Smooth transition for visibility changes */
+  pointer-events: none;
 }
 
 #constellation-lines {
