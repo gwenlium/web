@@ -33,4 +33,4 @@ Open `index.html` in your browser.
 
 ## License
 
-MIT
+MIT :P

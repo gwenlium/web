@@ -82,6 +82,11 @@
   <canvas id="starfield"></canvas>
   <button class="back-btn" onclick="window.location.href='index.html'">Zurück</button>
   <div id="facts-container"></div>
+  <div id="starfield-speed-slider-container" style="display:flex;align-items:center;gap:0.5em;position:fixed;bottom:54px;left:50%;transform:translateX(-50%);z-index:40;background:rgba(26,34,56,0.92);padding:0.4em 0.8em;border-radius:1.2em;box-shadow:0 0 12px #ffe06666;font-size:0.95em;">
+    <label for="starfield-speed-slider" style="color:#ffe066;font-weight:bold;font-size:0.95em;margin-right:0.3em;">Sternfeld-Geschwindigkeit</label>
+    <input id="starfield-speed-slider" type="range" min="3" max="10" step="0.1" value="5" style="width:80px;height:18px;vertical-align:middle;">
+    <span id="starfield-speed-value" style="color:#fff;font-weight:bold;font-size:0.95em;margin-left:0.2em;">5.0x</span>
+  </div>
   <footer class="watermark">Flashily created by Gwendolyn Erkut, T6b</footer>
   <script>
     // Starfield animation (reuse from main page)
@@ -89,6 +94,7 @@
     const ctx = canvas.getContext('2d');
     let stars = [];
     const STAR_COUNT = 180;
+    let starfieldSpeed = 5; // Match index.html default
     function resizeCanvas() {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -120,7 +126,7 @@
         ctx.shadowBlur = 8;
         ctx.fill();
         ctx.restore();
-        star.y += star.speed * 5;
+        star.y += star.speed * starfieldSpeed;
         if (star.y > canvas.height) {
           star.y = 0;
           star.x = Math.random() * canvas.width;
@@ -129,8 +135,37 @@
       requestAnimationFrame(animateStars);
     }
     animateStars();
+
+    // --- Space Emoji Particles ---
+    const spaceEmojis = ['🌟','🪐','🚀','🌙','👽','🛰️','☄️','🌌','🔭','🛸'];
+    function spawnEmojiParticle() {
+      const emoji = document.createElement('div');
+      emoji.textContent = spaceEmojis[Math.floor(Math.random() * spaceEmojis.length)];
+      emoji.style.position = 'fixed';
+      emoji.style.left = Math.random() * window.innerWidth + 'px';
+      emoji.style.top = (Math.random() * 0.8 + 0.05) * window.innerHeight + 'px';
+      emoji.style.fontSize = (28 + Math.random() * 22) + 'px';
+      emoji.style.opacity = '0.82';
+      emoji.style.pointerEvents = 'none';
+      emoji.style.zIndex = '2';
+      emoji.style.transition = 'transform 2.5s linear, opacity 2.5s linear';
+      emoji.style.filter = 'drop-shadow(0 0 8px #ffe06688)';
+      document.body.appendChild(emoji);
+      // Animate: drift up and fade out, with a little horizontal movement
+      const driftX = (Math.random() - 0.5) * 120;
+      const driftY = -120 - Math.random() * 80;
+      setTimeout(() => {
+        emoji.style.transform = `translate(${driftX}px, ${driftY}px) scale(${0.7 + Math.random()*0.6})`;
+        emoji.style.opacity = '0';
+      }, 60);
+      setTimeout(() => emoji.remove(), 2600);
+    }
+    setInterval(() => {
+      if (Math.random() < 0.7) spawnEmojiParticle();
+    }, 1500);
+
     // Facts
-    const facts = [
+    let facts = [
       'Das Hubble-Teleskop umkreist die Erde in ca. 540 km Höhe.',
       'Das grösste optische Einzelteleskop ist das Gran Telescopio Canarias (10,4 m Spiegel).',
       'Radioteleskope können so gross wie ein Fussballfeld sein!',
@@ -142,6 +177,32 @@
       'Das VLT in Chile besteht aus vier 8,2-m-Teleskopen.',
       'Das Arecibo-Observatorium war das grösste Radioteleskop der Welt.'
     ];
+    // --- More telescope facts for the floating windows ---
+    const moreFacts = [
+      'Das erste bekannte Fernrohr wurde 1608 von Hans Lippershey gebaut.',
+      'Das Hubble-Teleskop hat über 1,5 Millionen Beobachtungen gemacht.',
+      'Das James Webb Space Telescope kann bis zu 13,6 Milliarden Lichtjahre weit sehen.',
+      'Radioteleskope wie das FAST in China haben einen Durchmesser von 500 Metern.',
+      'Das Very Large Telescope (VLT) in Chile besteht aus vier 8,2-Meter-Spiegeln.',
+      'Adaptive Optik ermöglicht bodengebundenen Teleskopen, schärfere Bilder zu liefern.',
+      'Das Keck-Observatorium nutzt segmentierte Spiegel für eine größere Öffnung.',
+      'Das Arecibo-Observatorium war bis 2020 das größte Radioteleskop der Welt.',
+      'Das Event Horizon Telescope hat das erste Bild eines Schwarzen Lochs aufgenommen.',
+      'Das Gran Telescopio Canarias ist das größte optische Einzelteleskop.',
+      'Teleskope können verschiedene Wellenlängenbereiche beobachten: Radio, Infrarot, UV, Röntgen und Gamma.',
+      'Das Spitzer-Teleskop war auf Infrarotbeobachtungen spezialisiert.',
+      'Das Chandra-Teleskop beobachtet das Universum im Röntgenbereich.',
+      'Das Hubble-Teleskop wurde 5-mal im All gewartet und repariert.',
+      'Mit Teleskopen wurden über 5000 Exoplaneten entdeckt.',
+      'Das JWST hat einen goldbeschichteten Hauptspiegel mit 6,5 Metern Durchmesser.',
+      'Das VLT kann als Interferometer betrieben werden und so extrem hohe Auflösung erreichen.',
+      'Das Hubble Deep Field Bild zeigt Tausende Galaxien in einem winzigen Himmelsausschnitt.',
+      'Das erste Spiegelteleskop wurde von Isaac Newton gebaut.',
+      'Das Square Kilometre Array (SKA) wird das größte Radioteleskop der Welt sein.'
+    ];
+    // Merge and deduplicate facts
+    facts = Array.from(new Set([...facts, ...moreFacts]));
+
     // Random positions for floating windows
     function randomPos(w, h) {
       const pad = 60;
@@ -245,15 +306,25 @@
       });
 
       // --- Fun: spawn more floating windows every second ---
-      let allFacts = Array.from(factWindows).map(win => win.innerHTML);
       let spawned = factWindows.length;
+      let usedFactIndices = new Set([...Array(facts.length).keys()].slice(0, spawned));
       function spawnFactWindow() {
-        if (spawned >= allFacts.length * 3) return; // Limit to 3x original count
-        // Pick a random fact (cycling through)
-        const factIdx = spawned % allFacts.length;
+        if (spawned >= facts.length * 3) return; // Limit to 3x unique facts
+        // Find next unused fact index
+        let nextIdx = -1;
+        for (let i = 0; i < facts.length; i++) {
+          // Only allow up to 3 windows per fact
+          let count = Array.from(document.querySelectorAll('.fact-window')).filter(w => w.textContent === facts[i]).length;
+          if (count < 3) {
+            nextIdx = i;
+            break;
+          }
+        }
+        if (nextIdx === -1) return; // All facts at max
+        const fact = facts[nextIdx];
         const win = document.createElement('div');
         win.className = 'fact-window';
-        win.innerHTML = allFacts[factIdx];
+        win.textContent = fact;
         win.style.position = 'fixed';
         win.style.left = centerX - 120 + 'px';
         win.style.top = centerY - 60 + 'px';
@@ -287,33 +358,14 @@
       }
       setInterval(spawnFactWindow, 1000);
     });
-    // --- More telescope facts for the floating windows ---
-    const moreFacts = [
-      'Das erste bekannte Fernrohr wurde 1608 von Hans Lippershey gebaut.',
-      'Das Hubble-Teleskop hat über 1,5 Millionen Beobachtungen gemacht.',
-      'Das James Webb Space Telescope kann bis zu 13,6 Milliarden Lichtjahre weit sehen.',
-      'Radioteleskope wie das FAST in China haben einen Durchmesser von 500 Metern.',
-      'Das Very Large Telescope (VLT) in Chile besteht aus vier 8,2-Meter-Spiegeln.',
-      'Adaptive Optik ermöglicht bodengebundenen Teleskopen, schärfere Bilder zu liefern.',
-      'Das Keck-Observatorium nutzt segmentierte Spiegel für eine größere Öffnung.',
-      'Das Arecibo-Observatorium war bis 2020 das größte Radioteleskop der Welt.',
-      'Das Event Horizon Telescope hat das erste Bild eines Schwarzen Lochs aufgenommen.',
-      'Das Gran Telescopio Canarias ist das größte optische Einzelteleskop.',
-      'Teleskope können verschiedene Wellenlängenbereiche beobachten: Radio, Infrarot, UV, Röntgen und Gamma.',
-      'Das Spitzer-Teleskop war auf Infrarotbeobachtungen spezialisiert.',
-      'Das Chandra-Teleskop beobachtet das Universum im Röntgenbereich.',
-      'Das Hubble-Teleskop wurde 5-mal im All gewartet und repariert.',
-      'Mit Teleskopen wurden über 5000 Exoplaneten entdeckt.',
-      'Das JWST hat einen goldbeschichteten Hauptspiegel mit 6,5 Metern Durchmesser.',
-      'Das VLT kann als Interferometer betrieben werden und so extrem hohe Auflösung erreichen.',
-      'Das Hubble Deep Field Bild zeigt Tausende Galaxien in einem winzigen Himmelsausschnitt.',
-      'Das erste Spiegelteleskop wurde von Isaac Newton gebaut.',
-      'Das Square Kilometre Array (SKA) wird das größte Radioteleskop der Welt sein.'
-    ];
-    // If you have a facts array, merge these in for more variety
-    if (typeof facts !== 'undefined' && Array.isArray(facts)) {
-      facts.push(...moreFacts);
-    }
+
+    // Starfield speed slider logic
+    const speedSlider = document.getElementById('starfield-speed-slider');
+    const speedValue = document.getElementById('starfield-speed-value');
+    speedSlider.addEventListener('input', function() {
+      starfieldSpeed = parseFloat(this.value);
+      speedValue.textContent = this.value + 'x';
+    });
   </script>
 </body>
 </html>
