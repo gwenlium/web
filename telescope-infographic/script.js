@@ -1159,6 +1159,8 @@ function enhanceModalImages() {
       overlay.style.zIndex = '2000';
       overlay.style.pointerEvents = 'auto'; // Allow overlay to receive clicks
       overlay.style.background = 'none';
+      overlay.style.opacity = '1';
+      overlay.style.transition = 'opacity 0.4s cubic-bezier(0.4,0,0.2,1)';
       document.body.appendChild(overlay);
       // Clone image for animation
       const fullImg = document.createElement('img');
@@ -1171,13 +1173,13 @@ function enhanceModalImages() {
       fullImg.style.height = rect.height + 'px';
       fullImg.style.borderRadius = '12px';
       fullImg.style.boxShadow = '0 8px 32px #0002, 0 0 0 2px #ffe066cc';
-      fullImg.style.transition = 'all 0.45s cubic-bezier(.34,1.56,.64,1)';
+      fullImg.style.transition = 'all 0.45s cubic-bezier(.34,1.56,.64,1), opacity 0.4s cubic-bezier(0.4,0,0.2,1)';
       fullImg.style.cursor = 'zoom-out';
       fullImg.style.objectFit = 'contain';
       fullImg.style.background = '#fff';
       fullImg.style.zIndex = '2001';
+      fullImg.style.opacity = '1';
       document.body.appendChild(fullImg);
-      // Animate to center and larger size
       setTimeout(() => {
         const vw = window.innerWidth;
         const vh = window.innerHeight;
@@ -1190,33 +1192,28 @@ function enhanceModalImages() {
         fullImg.style.borderRadius = '18px';
         fullImg.style.boxShadow = '0 12px 48px #0003, 0 0 0 4px #ffe066cc';
       }, 10);
-      // Ensure both overlay and zoomed image are clickable to close
       function enableZoomedImageClose(overlay, zoomedImg, originalRect, onClose) {
-          function closeZoom() {
-              // Animate image back to original position
-              zoomedImg.style.transition = 'all 0.4s cubic-bezier(0.4,0,0.2,1)';
-              zoomedImg.style.left = originalRect.left + 'px';
-              zoomedImg.style.top = originalRect.top + 'px';
-              zoomedImg.style.width = originalRect.width + 'px';
-              zoomedImg.style.height = originalRect.height + 'px';
-              zoomedImg.style.transform = 'none';
-              overlay.style.background = 'rgba(0,0,0,0)';
-              // After animation, remove overlay and image
-              setTimeout(() => {
-                  if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
-                  if (typeof onClose === 'function') onClose();
-              }, 400);
-          }
-          overlay.addEventListener('click', closeZoom);
-          zoomedImg.addEventListener('click', closeZoom);
-          // Prevent click on image from bubbling to overlay and causing double-close
-          zoomedImg.addEventListener('click', e => e.stopPropagation());
+        function closeZoom() {
+          zoomedImg.style.transition = 'all 0.4s cubic-bezier(0.4,0,0.2,1), opacity 0.4s cubic-bezier(0.4,0,0.2,1)';
+          zoomedImg.style.left = originalRect.left + 'px';
+          zoomedImg.style.top = originalRect.top + 'px';
+          zoomedImg.style.width = originalRect.width + 'px';
+          zoomedImg.style.height = originalRect.height + 'px';
+          zoomedImg.style.transform = 'none';
+          zoomedImg.style.opacity = '0';
+          overlay.style.opacity = '0';
+          // After animation, remove overlay and image
+          setTimeout(() => {
+            if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+            if (zoomedImg.parentNode) zoomedImg.parentNode.removeChild(zoomedImg);
+            if (typeof onClose === 'function') onClose();
+          }, 400);
+        }
+        overlay.addEventListener('click', closeZoom);
+        zoomedImg.addEventListener('click', closeZoom);
+        zoomedImg.addEventListener('click', e => e.stopPropagation());
       }
-
-      // Click overlay or image to zoom out and close
-      enableZoomedImageClose(overlay, fullImg, rect, () => {
-        // Optionally restore scroll or pointer events if needed
-      });
+      enableZoomedImageClose(overlay, fullImg, rect, () => {});
     };
   });
 }
