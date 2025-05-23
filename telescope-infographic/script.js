@@ -824,20 +824,35 @@ document.body.insertBefore(nebula, canvas);
 function shootingStar() {
   const star = document.createElement('div');
   star.style.position = 'fixed';
-  star.style.width = '2px';
-  star.style.height = '80px';
+  const randomSize = Math.random() * 3 + 1; // Random width (1px to 4px)
+  const randomLength = Math.random() * 100 + 60; // Random tail length (60px to 160px)
+  const randomSpeed = Math.random() * 800 + 800; // Random duration (0.8s to 1.6s)
+
+  star.style.width = randomSize + 'px';
+  star.style.height = randomLength + 'px';
   star.style.background = 'linear-gradient(180deg, #fff, #ffe06600)';
   star.style.left = Math.random() * window.innerWidth + 'px';
-  star.style.top = (Math.random() * 0.5 + 0.1) * window.innerHeight + 'px';
-  star.style.opacity = '0.7';
+  star.style.top = (Math.random() * 0.4 + 0.05) * window.innerHeight + 'px'; // Start higher up
+  star.style.opacity = '0'; // Start invisible for flash effect
   star.style.zIndex = '3';
   star.style.pointerEvents = 'none';
   document.body.appendChild(star);
+
+  // Initial flash effect
   star.animate([
-    { transform: 'translateY(0) scaleY(1)' },
-    { transform: 'translateY(120px) scaleY(0.5)', opacity: 0 }
-  ], { duration: 1200, easing: 'ease-out' });
-  setTimeout(() => star.remove(), 1200);
+
+    { opacity: 0, transform: 'translateY(-20px) scaleY(0.5)' }, // Start slightly above, compressed
+    { opacity: 0.9, transform: 'translateY(-10px) scaleY(1)', offset: 0.1 }, // Bright flash, expand
+    { opacity: 0.7, transform: 'translateY(0) scaleY(1)', offset: 0.2 } // Settle to normal opacity
+  ], { duration: 300, easing: 'ease-out' }).onfinish = () => {
+    // Main falling animation after flash
+    star.animate([
+      { transform: 'translateY(0) scaleY(1)', opacity: 0.7 },
+      { transform: `translateY(${120 + Math.random() * 80}px) scaleY(0.3)`, opacity: 0 } // Fall further, shrink more
+    ], { duration: randomSpeed, easing: 'ease-in' }).onfinish = () => {
+      star.remove();
+    };
+  };
 }
 setInterval(() => { if (Math.random() < 0.25) shootingStar(); }, 2000);
 
@@ -1011,7 +1026,8 @@ document.body.appendChild(randomBtn);
         'ESA: https://www.esa.int/Science_Exploration/Space_Science/Herschel',
         'Wikipedia: https://de.wikipedia.org/wiki/Teleskop',
         'Max-Planck-Institut für Astronomie: https://www.mpia.de/de/oeffentlichkeit/astronomische-bilder/teleskope',
-        'ESO: https://www.eso.org/public/germany/teles-instr/'
+        'ESO: https://www.eso.org/public/germany/teles-instr/',
+        'Typen von Teleskopen: https://www.benel.de/de/beratung/Teleskope'
       ]
     }
   ];
@@ -1122,3 +1138,90 @@ document.body.appendChild(randomBtn);
     }
   };
 })();
+
+// --- Enhance Modal Images: Click to Zoom ---
+function enhanceModalImages() {
+  const modalBody = document.getElementById('modal-body');
+  if (!modalBody) return;
+  const imgs = modalBody.querySelectorAll('img');
+  imgs.forEach(img => {
+    img.style.cursor = 'zoom-in';
+    img.onclick = () => {
+      // Get image position and size
+      const rect = img.getBoundingClientRect();
+      // Create overlay for animation (transparent, no black bg)
+      const overlay = document.createElement('div');
+      overlay.style.position = 'fixed';
+      overlay.style.left = '0';
+      overlay.style.top = '0';
+      overlay.style.width = '100vw';
+      overlay.style.height = '100vh';
+      overlay.style.zIndex = '2000';
+      overlay.style.pointerEvents = 'auto'; // Allow overlay to receive clicks
+      overlay.style.background = 'none';
+      document.body.appendChild(overlay);
+      // Clone image for animation
+      const fullImg = document.createElement('img');
+      fullImg.src = img.src;
+      fullImg.alt = img.alt;
+      fullImg.style.position = 'fixed';
+      fullImg.style.left = rect.left + 'px';
+      fullImg.style.top = rect.top + 'px';
+      fullImg.style.width = rect.width + 'px';
+      fullImg.style.height = rect.height + 'px';
+      fullImg.style.borderRadius = '12px';
+      fullImg.style.boxShadow = '0 8px 32px #0002, 0 0 0 2px #ffe066cc';
+      fullImg.style.transition = 'all 0.45s cubic-bezier(.34,1.56,.64,1)';
+      fullImg.style.cursor = 'zoom-out';
+      fullImg.style.objectFit = 'contain';
+      fullImg.style.background = '#fff';
+      fullImg.style.zIndex = '2001';
+      document.body.appendChild(fullImg);
+      // Animate to center and larger size
+      setTimeout(() => {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const maxW = Math.min(vw * 0.92, 700);
+        const maxH = Math.min(vh * 0.92, 500);
+        fullImg.style.left = (vw/2 - maxW/2) + 'px';
+        fullImg.style.top = (vh/2 - maxH/2) + 'px';
+        fullImg.style.width = maxW + 'px';
+        fullImg.style.height = maxH + 'px';
+        fullImg.style.borderRadius = '18px';
+        fullImg.style.boxShadow = '0 12px 48px #0003, 0 0 0 4px #ffe066cc';
+      }, 10);
+      // Ensure both overlay and zoomed image are clickable to close
+      function enableZoomedImageClose(overlay, zoomedImg, originalRect, onClose) {
+          function closeZoom() {
+              // Animate image back to original position
+              zoomedImg.style.transition = 'all 0.4s cubic-bezier(0.4,0,0.2,1)';
+              zoomedImg.style.left = originalRect.left + 'px';
+              zoomedImg.style.top = originalRect.top + 'px';
+              zoomedImg.style.width = originalRect.width + 'px';
+              zoomedImg.style.height = originalRect.height + 'px';
+              zoomedImg.style.transform = 'none';
+              overlay.style.background = 'rgba(0,0,0,0)';
+              // After animation, remove overlay and image
+              setTimeout(() => {
+                  if (overlay.parentNode) overlay.parentNode.removeChild(overlay);
+                  if (typeof onClose === 'function') onClose();
+              }, 400);
+          }
+          overlay.addEventListener('click', closeZoom);
+          zoomedImg.addEventListener('click', closeZoom);
+          // Prevent click on image from bubbling to overlay and causing double-close
+          zoomedImg.addEventListener('click', e => e.stopPropagation());
+      }
+
+      // Click overlay or image to zoom out and close
+      enableZoomedImageClose(overlay, fullImg, rect, () => {
+        // Optionally restore scroll or pointer events if needed
+      });
+    };
+  });
+}
+const origOpenModal = openModal;
+openModal = function(topic, clickedElement) {
+  origOpenModal.call(this, topic, clickedElement);
+  setTimeout(enhanceModalImages, 10);
+};
