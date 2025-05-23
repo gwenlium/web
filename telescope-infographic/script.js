@@ -83,12 +83,16 @@ resizeCanvas();
 function createStars() {
   stars = [];
   for (let i = 0; i < STAR_COUNT; i++) {
+    const r = Math.random() * 1.2 + 0.3; // Original radius
     stars.push({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      r: Math.random() * 1.2 + 0.3,
+      r: r,
       speed: Math.random() * 0.15 + 0.05,
-      alpha: Math.random() * 0.5 + 0.5
+      alpha: Math.random() * 0.5 + 0.5,
+      depth: 0.5 + (1.5 - r) / 1.2 * 0.5, // Closer stars (larger r) have smaller depth, further stars (smaller r) have larger depth
+      twinkleSpeed: Math.random() * 0.05 + 0.01, // How fast it twinkles
+      twinklePhase: Math.random() * Math.PI * 2 // Initial phase for twinkling
     });
   }
 }
@@ -96,9 +100,13 @@ createStars();
 
 function animateStars() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const time = Date.now() / 1000; // Get current time in seconds for twinkling
+
   for (let star of stars) {
     ctx.save();
-    ctx.globalAlpha = star.alpha;
+    // Twinkling effect: vary alpha
+    const twinkle = Math.sin(time * star.twinkleSpeed + star.twinklePhase) * 0.2 + 0.8; // Modulate between 0.6 and 1.0 of base alpha
+    ctx.globalAlpha = star.alpha * twinkle;
     ctx.beginPath();
     ctx.arc(star.x, star.y, star.r, 0, 2 * Math.PI);
     ctx.fillStyle = '#fff';
@@ -106,7 +114,9 @@ function animateStars() {
     ctx.shadowBlur = 8;
     ctx.fill();
     ctx.restore();
-    star.y += star.speed * starSpeedMultiplier; // <-- Use multiplier
+    // Parallax effect: speed is influenced by depth
+    // Stars with higher depth (further away) move slower relative to the multiplier
+    star.y += (star.speed / star.depth) * starSpeedMultiplier;
     if (star.y > canvas.height) {
       star.y = 0;
       star.x = Math.random() * canvas.width;
@@ -692,13 +702,21 @@ function animateOrbits(ts) {
     const speed = 0.12 + 0.04 * i;
     const angle = nodeAngles[i] * Math.PI / 180 + t * speed;
     const r = orbitRadii[i % orbitRadii.length];
-    // Bobbing effect
+    
+    // Bobbing effect (vertical)
     const bob = Math.sin(t * 1.2 + i) * 8;
-    const x = centerX + Math.cos(angle) * r;
+    // Sway effect (horizontal)
+    const sway = Math.cos(t * 0.9 + i * 0.5) * 6; 
+
+    const x = centerX + Math.cos(angle) * r + sway; // Added sway
     const y = centerY + Math.sin(angle) * r * 0.5 + bob;
+    
+    // Node's own slow rotation
+    const nodeRotation = (t * 10 + i * 20); // Degrees, slow rotation, varies per node
+
     node.style.left = x + 'px';
     node.style.top = y + 'px';
-    node.style.transform = `translate(-50%, -50%) scale(${currentOrbScale})`;
+    node.style.transform = `translate(-50%, -50%) scale(${currentOrbScale}) rotate(${nodeRotation}deg)`;
     node.style.opacity = currentOrbOpacity;
     node.style.pointerEvents = currentOrbPointerEvents;
   });
