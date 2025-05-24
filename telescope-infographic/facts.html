@@ -116,11 +116,19 @@
       background: #4a90e2;
       outline: none;
     }
+    body.zoom-fade-out {
+      animation: zoomFadeOut 0.85s cubic-bezier(.7,0,.3,1) forwards;
+    }
+    @keyframes zoomFadeOut {
+      0% { opacity: 1; transform: scale(1); }
+      80% { opacity: 0.5; transform: scale(1.12); }
+      100% { opacity: 0; transform: scale(1.18); }
+    }
   </style>
 </head>
 <body>
   <canvas id="starfield"></canvas>
-  <button class="back-btn" onclick="window.location.href='index.html'">Zurück</button>
+  <button class="back-btn" id="back-btn">Zurück</button>
   <div id="facts-container"></div>
   <div id="starfield-speed-slider-container" style="display:flex;align-items:center;gap:0.5em;position:fixed;bottom:54px;left:50%;transform:translateX(-50%);z-index:40;background:rgba(26,34,56,0.92);padding:0.4em 0.8em;border-radius:1.2em;box-shadow:0 0 12px #ffe06666;font-size:0.95em;">
     <label for="starfield-speed-slider" style="color:#ffe066;font-weight:bold;font-size:0.95em;margin-right:0.3em;">Sternfeld-Geschwindigkeit</label>
@@ -132,6 +140,7 @@
     <div style="margin-top:1em;color:#ffe066;font-size:1.1em;">Alle Fakten wurden angezeigt! 🎉</div>
   </div>
   <button id="randomize-facts-btn" class="facts-action-btn" style="position:fixed;top:24px;right:24px;z-index:100;">Randomisieren</button>
+  <button id="spawn-fact-btn" class="facts-action-btn" style="position:fixed;top:76px;right:24px;z-index:100;">Neues Fakt-Fenster</button>
   <footer class="watermark">Flashily created by Gwendolyn Erkut, T6b</footer>
   <script>
     // Starfield animation (reuse from main page)
@@ -183,7 +192,11 @@
 
     // --- Space Emoji Particles ---
     const spaceEmojis = ['🌟','🪐','🚀','🌙','👽','🛰️','☄️','🌌','🔭','🛸'];
+    let emojiParticleCount = 0;
+    const MAX_EMOJI_PARTICLES = 24;
     function spawnEmojiParticle() {
+      if (emojiParticleCount >= MAX_EMOJI_PARTICLES) return;
+      emojiParticleCount++;
       const emoji = document.createElement('div');
       emoji.textContent = spaceEmojis[Math.floor(Math.random() * spaceEmojis.length)];
       emoji.style.position = 'fixed';
@@ -203,11 +216,15 @@
         emoji.style.transform = `translate(${driftX}px, ${driftY}px) scale(${0.7 + Math.random()*0.6})`;
         emoji.style.opacity = '0';
       }, 60);
-      setTimeout(() => emoji.remove(), 2600);
+      setTimeout(() => {
+        emoji.remove();
+        emojiParticleCount--;
+      }, 2600);
     }
     setInterval(() => {
-      if (Math.random() < 0.7) spawnEmojiParticle();
-    }, 1500);
+      // Spawn more frequently, but cap total
+      if (Math.random() < 0.93) spawnEmojiParticle();
+    }, 600);
 
     // --- Improved Fact Windows System with Randomize ---
     let facts = [
@@ -372,6 +389,22 @@
       shuffledFacts = shuffle([...facts]);
       showFactWindows();
     };
+    document.getElementById('spawn-fact-btn').onclick = () => {
+      // Find all indices not shown and not currently visible
+      let visibleIndices = Array.from(document.querySelectorAll('.fact-window')).map(win => win.getAttribute('data-fact-idx')).filter(x => x !== null).map(Number);
+      let available = [];
+      for (let i = 0; i < shuffledFacts.length; i++) {
+        if (!shownIndices.has(i) && !visibleIndices.includes(i)) {
+          available.push(i);
+        }
+      }
+      if (available.length > 0) {
+        // Pick a random available index
+        const randomIdx = available[Math.floor(Math.random() * available.length)];
+        createFactWindow(randomIdx);
+      }
+      checkAllShown();
+    };
     window.addEventListener('DOMContentLoaded', showFactWindows);
     window.addEventListener('resize', showFactWindows);
 
@@ -382,6 +415,13 @@
       starfieldSpeed = parseFloat(this.value);
       speedValue.textContent = this.value + 'x';
     });
+    document.getElementById('back-btn').onclick = function(e) {
+      e.preventDefault();
+      document.body.classList.add('zoom-fade-out');
+      setTimeout(() => {
+        window.location.href = 'index.html';
+      }, 800);
+    };
   </script>
 </body>
 </html>
