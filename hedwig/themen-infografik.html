@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Werde, die du bist! – Themen-Infografik</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+      margin: 0; padding: 0;
+      min-height: 100vh;
+    }
+    h1 {
+      text-align: center; margin-top: 30px;
+      color: #2d3a4b;
+      letter-spacing: 1px;
+    }
+    .infografik-container {
+      display: flex; justify-content: center; align-items: center; height: 70vh;
+    }
+    .bubble-chart {
+      position: relative; width: 700px; height: 500px;
+    }
+    .bubble {
+      position: absolute;
+      border-radius: 50%;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: box-shadow 0.2s, transform 0.5s cubic-bezier(.68,-0.55,.27,1.55), background 0.3s;
+      box-shadow: 0 2px 16px rgba(44,62,80,0.13);
+      font-size: 1.1em;
+      font-weight: 500;
+      text-align: center;
+      padding: 0 10px;
+      line-height: 1.3;
+      letter-spacing: 0.5px;
+      user-select: none;
+      opacity: 0;
+      animation: bubbleIn 1s cubic-bezier(.68,-0.55,.27,1.55) forwards;
+    }
+    .bubble span {
+      width: 90%;
+      word-break: break-word;
+      text-shadow: 0 2px 8px rgba(44,62,80,0.13);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      height: 100%;
+      font-size: 1.15em;
+      font-weight: 600;
+      line-height: 1.25;
+      letter-spacing: 0.01em;
+      padding: 0 6px;
+      text-align: center;
+      white-space: pre-line;
+    }
+    .bubble.selected {
+      box-shadow: 0 0 0 8px #ffb347, 0 2px 16px rgba(44,62,80,0.18);
+      z-index: 2;
+      transform: scale(1.08);
+    }
+    .bubble:hover {
+      transform: scale(1.06);
+      filter: brightness(1.08);
+    }
+    @keyframes bubbleIn {
+      0% { opacity: 0; transform: scale(0.2); }
+      70% { opacity: 1; transform: scale(1.15); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+    .info-panel {
+      position: fixed; right: 40px; top: 100px; width: 320px;
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.15);
+      padding: 24px; display: none;
+      color: #2d3a4b;
+      animation: fadeInPanel 0.5s;
+    }
+    .info-panel.active { display: block; }
+    @keyframes fadeInPanel {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .close-btn {
+      position: absolute; top: 10px; right: 16px;
+      background: none; border: none; font-size: 1.2em;
+      cursor: pointer; color: #888;
+      transition: color 0.2s;
+    }
+    .close-btn:hover { color: #c0392b; }
+    @media (max-width: 900px) {
+      .infografik-container { flex-direction: column; }
+      .info-panel { position: static; width: 90vw; margin: 20px auto; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Themen der Novelle „Werde, die du bist!“</h1>
+  <div class="infografik-container">
+    <div class="bubble-chart" id="bubbleChart"></div>
+    <div class="info-panel" id="infoPanel">
+      <button class="close-btn" onclick="closePanel()">×</button>
+      <div id="infoContent"></div>
+    </div>
+  </div>
+  <script>
+    // Themen und Beschreibungen
+    const themen = [
+      {
+        titel: "Selbstverwirklichung",
+        beschreibung: "Die Suche nach der eigenen Identität und das Streben, das eigene Potenzial zu entfalten, stehen im Mittelpunkt der Novelle. Die Protagonistin ringt mit gesellschaftlichen Erwartungen und ihrem eigenen Selbstbild.",
+        farbe: "#6a5acd"
+      },
+      {
+        titel: "Emanzipation der Frau",
+        beschreibung: "Hedwig Dohm thematisiert die Rolle der Frau im 19. Jahrhundert und fordert Gleichberechtigung, Selbstbestimmung und Bildung für Frauen.",
+        farbe: "#ff69b4"
+      },
+      {
+        titel: "Gesellschaftliche Konventionen",
+        beschreibung: "Die Novelle kritisiert starre gesellschaftliche Normen und Zwänge, die individuelle Entwicklung und Freiheit behindern.",
+        farbe: "#ffa500"
+      },
+      {
+        titel: "Bildung und Selbstbildung",
+        beschreibung: "Bildung wird als Schlüssel zur Selbstfindung und Emanzipation dargestellt. Die Protagonistin strebt nach Wissen und persönlicher Entwicklung.",
+        farbe: "#20b2aa"
+      },
+      {
+        titel: "Innere Konflikte",
+        beschreibung: "Die Hauptfigur erlebt innere Zerrissenheit zwischen eigenen Wünschen und äusseren Erwartungen. Diese Konflikte prägen ihren Entwicklungsweg.",
+        farbe: "#e67e22"
+      },
+      {
+        titel: "Kritik an patriarchalen Strukturen",
+        beschreibung: "Die Novelle setzt sich kritisch mit patriarchalen Machtverhältnissen auseinander und fordert deren Überwindung.",
+        farbe: "#c0392b"
+      },
+      {
+        titel: "Individuum und Gesellschaft",
+        beschreibung: "Das Spannungsfeld zwischen individueller Freiheit und gesellschaftlicher Anpassung wird beleuchtet.",
+        farbe: "#2980b9"
+      }
+    ];
+
+    // Bubble-Positionen (Kreisförmig)
+    const centerX = 350, centerY = 250, radius = 170;
+    const bubbleSizes = [120, 100, 90, 80, 80, 70, 70];
+    const chart = document.getElementById('bubbleChart');
+
+    themen.forEach((thema, i) => {
+      const angle = (i / themen.length) * 2 * Math.PI;
+      const x = centerX + Math.cos(angle) * radius - bubbleSizes[i]/2;
+      const y = centerY + Math.sin(angle) * radius - bubbleSizes[i]/2;
+      const div = document.createElement('div');
+      div.className = 'bubble';
+      div.style.background = `linear-gradient(135deg, ${thema.farbe} 60%, #4e5d6c 100%)`;
+      div.style.width = div.style.height = bubbleSizes[i] + 'px';
+      div.style.left = x + 'px';
+      div.style.top = y + 'px';
+      div.style.animationDelay = (i * 0.13) + 's';
+      div.innerHTML = `<span>${thema.titel}</span>`;
+      div.onclick = () => showInfo(i, div);
+      chart.appendChild(div);
+    });
+
+    function showInfo(idx, bubbleDiv) {
+      document.querySelectorAll('.bubble').forEach(b => b.classList.remove('selected'));
+      bubbleDiv.classList.add('selected');
+      const infoPanel = document.getElementById('infoPanel');
+      const infoContent = document.getElementById('infoContent');
+      infoContent.innerHTML = `<h2 style='margin-top:0;'>${themen[idx].titel}</h2><p>${themen[idx].beschreibung}</p>`;
+      infoPanel.classList.add('active');
+      infoPanel.style.animation = 'fadeInPanel 0.5s';
+    }
+    function closePanel() {
+      document.getElementById('infoPanel').classList.remove('active');
+      document.querySelectorAll('.bubble').forEach(b => b.classList.remove('selected'));
+    }
+  </script>
+</body>
+</html>

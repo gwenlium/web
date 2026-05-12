@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teleskop-Fakten</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background: linear-gradient(135deg, #23243a 0%, #3a2e5f 60%, #1e466e 100%) !important;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    .fact-window {
+      position: absolute;
+      min-width: 220px;
+      max-width: 320px;
+      background: rgba(34, 40, 60, 0.98);
+      color: #ffe066;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px #000a, 0 0 0 2px #4a90e2aa;
+      padding: 1.2em 1.2em 1em 1.2em;
+      z-index: 10;
+      font-size: 1.1rem;
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: grab;
+      animation: popIn 0.5s cubic-bezier(.34,1.56,.64,1);
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .fact-window:active {
+      cursor: grabbing;
+      box-shadow: 0 12px 40px #000c, 0 0 0 3px #ffe066cc;
+    }
+    .fact-window.floating {
+      animation: floaty 2.5s ease-in-out infinite alternate;
+    }
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.3) translateY(60px); }
+      60% { opacity: 1; transform: scale(1.15) translateY(-10px); }
+      80% { transform: scale(0.95) translateY(2px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    @keyframes floaty {
+      0% { transform: translateY(0) scale(1); }
+      100% { transform: translateY(-18px) scale(1.03); }
+    }
+    .back-btn {
+      position: fixed;
+      top: 24px;
+      left: 24px;
+      z-index: 100;
+      background: #ffe066;
+      color: #1a2238;
+      font-weight: bold;
+      font-size: 1.1em;
+      border: none;
+      border-radius: 1.2em;
+      padding: 0.7em 1.5em;
+      box-shadow: 0 2px 12px #0005;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .back-btn:hover {
+      background: #fff6b0;
+      color: #4a90e2;
+    }
+    /* Fade-in effect for facts page */
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+    .facts-fadein {
+      animation: fadeIn 1s ease-out forwards;
+    }
+    .facts-action-btn {
+      font-size: 1.1em;
+      padding: 0.7em 1.5em;
+      border-radius: 1.2em;
+      background: #ffe066;
+      color: #1a2238;
+      font-weight: bold;
+      box-shadow: 0 0 16px #ffe06688;
+      cursor: pointer;
+      border: none;
+      margin: 0.5em 0;
+      transition: background 0.2s, color 0.2s, transform 0.2s;
+    }
+    .facts-action-btn:hover, .facts-action-btn:focus {
+      background: #fff6b0;
+      color: #4a90e2;
+      transform: scale(1.07);
+      outline: none;
+    }
+    .fact-window .close-btn {
+      position: absolute;
+      top: 8px;
+      right: 14px;
+      cursor: pointer;
+      font-size: 1.3em;
+      color: #ffe066;
+      opacity: 0.85;
+      background: none;
+      border: none;
+      z-index: 10;
+      transition: opacity 0.2s, color 0.2s;
+      padding: 0 0.2em;
+      line-height: 1;
+      border-radius: 50%;
+    }
+    .fact-window .close-btn:hover, .fact-window .close-btn:focus {
+      opacity: 1;
+      color: #fff6b0;
+      background: #4a90e2;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="starfield"></canvas>
+  <button class="back-btn" onclick="window.location.href='index.html'">Zurück</button>
+  <div id="facts-container"></div>
+  <div id="starfield-speed-slider-container" style="display:flex;align-items:center;gap:0.5em;position:fixed;bottom:54px;left:50%;transform:translateX(-50%);z-index:40;background:rgba(26,34,56,0.92);padding:0.4em 0.8em;border-radius:1.2em;box-shadow:0 0 12px #ffe06666;font-size:0.95em;">
+    <label for="starfield-speed-slider" style="color:#ffe066;font-weight:bold;font-size:0.95em;margin-right:0.3em;">Sternfeld-Geschwindigkeit</label>
+    <input id="starfield-speed-slider" type="range" min="3" max="10" step="0.1" value="5" style="width:80px;height:18px;vertical-align:middle;">
+    <span id="starfield-speed-value" style="color:#fff;font-weight:bold;font-size:0.95em;margin-left:0.2em;">5.0x</span>
+  </div>
+  <div id="show-all-again-container" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2000;text-align:center;">
+    <button id="show-all-again-btn" class="facts-action-btn">Alle Fakten erneut anzeigen</button>
+    <div style="margin-top:1em;color:#ffe066;font-size:1.1em;">Alle Fakten wurden angezeigt! 🎉</div>
+  </div>
+  <button id="randomize-facts-btn" class="facts-action-btn" style="position:fixed;top:24px;right:24px;z-index:100;">Randomisieren</button>
+  <footer class="watermark">Flashily created by Gwendolyn Erkut, T6b</footer>
+  <script>
+    // Starfield animation (reuse from main page)
+    const canvas = document.getElementById('starfield');
+    const ctx = canvas.getContext('2d');
+    let stars = [];
+    const STAR_COUNT = 180;
+    let starfieldSpeed = 5; // Match index.html default
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    function createStars() {
+      stars = [];
+      for (let i = 0; i < STAR_COUNT; i++) {
+        stars.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height,
+          r: Math.random() * 1.2 + 0.3,
+          speed: Math.random() * 0.15 + 0.05,
+          alpha: Math.random() * 0.5 + 0.5
+        });
+      }
+    }
+    createStars();
+    function animateStars() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let star of stars) {
+        ctx.save();
+        ctx.globalAlpha = star.alpha;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.r, 0, 2 * Math.PI);
+        ctx.fillStyle = '#fff';
+        ctx.shadowColor = '#fff';
+        ctx.shadowBlur = 8;
+        ctx.fill();
+        ctx.restore();
+        star.y += star.speed * starfieldSpeed;
+        if (star.y > canvas.height) {
+          star.y = 0;
+          star.x = Math.random() * canvas.width;
+        }
+      }
+      requestAnimationFrame(animateStars);
+    }
+    animateStars();
+
+    // --- Space Emoji Particles ---
+    const spaceEmojis = ['🌟','🪐','🚀','🌙','👽','🛰️','☄️','🌌','🔭','🛸'];
+    function spawnEmojiParticle() {
+      const emoji = document.createElement('div');
+      emoji.textContent = spaceEmojis[Math.floor(Math.random() * spaceEmojis.length)];
+      emoji.style.position = 'fixed';
+      emoji.style.left = Math.random() * window.innerWidth + 'px';
+      emoji.style.top = (Math.random() * 0.8 + 0.05) * window.innerHeight + 'px';
+      emoji.style.fontSize = (28 + Math.random() * 22) + 'px';
+      emoji.style.opacity = '0.82';
+      emoji.style.pointerEvents = 'none';
+      emoji.style.zIndex = '2';
+      emoji.style.transition = 'transform 2.5s linear, opacity 2.5s linear';
+      emoji.style.filter = 'drop-shadow(0 0 8px #ffe06688)';
+      document.body.appendChild(emoji);
+      // Animate: drift up and fade out, with a little horizontal movement
+      const driftX = (Math.random() - 0.5) * 120;
+      const driftY = -120 - Math.random() * 80;
+      setTimeout(() => {
+        emoji.style.transform = `translate(${driftX}px, ${driftY}px) scale(${0.7 + Math.random()*0.6})`;
+        emoji.style.opacity = '0';
+      }, 60);
+      setTimeout(() => emoji.remove(), 2600);
+    }
+    setInterval(() => {
+      if (Math.random() < 0.7) spawnEmojiParticle();
+    }, 1500);
+
+    // --- Improved Fact Windows System with Randomize ---
+    let facts = [
+      'Das Hubble-Teleskop umkreist die Erde in ca. 540 km Höhe.',
+      'Das grösste optische Einzelteleskop ist das Gran Telescopio Canarias (10,4 m Spiegel).',
+      'Radioteleskope können so gross wie ein Fussballfeld sein!',
+      'Galileo baute 1609 sein erstes Teleskop.',
+      'Das James Webb Space Telescope sieht Infrarotlicht aus der Frühzeit des Universums.',
+      'Einige Teleskope stehen im Weltall, um die Atmosphäre zu umgehen.',
+      'Adaptive Optik gleicht Luftunruhe aus und macht Bilder schärfer.',
+      'Mit Teleskopen wurden über 5000 Exoplaneten entdeckt.',
+      'Das VLT in Chile besteht aus vier 8,2-m-Teleskopen.',
+      'Das Arecibo-Observatorium war das grösste Radioteleskop der Welt.',
+      'Das erste bekannte Fernrohr wurde 1608 von Hans Lippershey gebaut.',
+      'Das Hubble-Teleskop hat über 1,5 Millionen Beobachtungen gemacht.',
+      'Das James Webb Space Telescope kann bis zu 13,6 Milliarden Lichtjahre weit sehen.',
+      'Radioteleskope wie das FAST in China haben einen Durchmesser von 500 Metern.',
+      'Das Very Large Telescope (VLT) in Chile besteht aus vier 8,2-Meter-Spiegeln.',
+      'Adaptive Optik ermöglicht bodengebundenen Teleskopen, schärfere Bilder zu liefern.',
+      'Das Keck-Observatorium nutzt segmentierte Spiegel für eine größere Öffnung.',
+      'Das Event Horizon Telescope hat das erste Bild eines Schwarzen Lochs aufgenommen.',
+      'Das Gran Telescopio Canarias ist das größte optische Einzelteleskop.',
+      'Teleskope können verschiedene Wellenlängenbereiche beobachten: Radio, Infrarot, UV, Röntgen und Gamma.',
+      'Das Spitzer-Teleskop war auf Infrarotbeobachtungen spezialisiert.',
+      'Das Chandra-Teleskop beobachtet das Universum im Röntgenbereich.',
+      'Das Hubble-Teleskop wurde 5-mal im All gewartet und repariert.',
+      'Das JWST hat einen goldbeschichteten Hauptspiegel mit 6,5 Metern Durchmesser.',
+      'Das VLT kann als Interferometer betrieben werden und so extrem hohe Auflösung erreichen.',
+      'Das Hubble Deep Field Bild zeigt Tausende Galaxien in einem winzigen Himmelsausschnitt.',
+      'Das erste Spiegelteleskop wurde von Isaac Newton gebaut.',
+      'Das Square Kilometre Array (SKA) wird das größte Radioteleskop der Welt sein.'
+    ];
+    // Remove duplicates
+    facts = Array.from(new Set(facts));
+    function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+    let shuffledFacts = shuffle([...facts]);
+    let shownIndices = new Set();
+    const MAX_VISIBLE = 5;
+    function showFactWindows() {
+      const container = document.getElementById('facts-container');
+      container.innerHTML = '';
+      let visible = 0;
+      for (let i = 0; i < shuffledFacts.length && visible < MAX_VISIBLE; i++) {
+        if (!shownIndices.has(i)) {
+          createFactWindow(i);
+          visible++;
+        }
+      }
+      checkAllShown();
+    }
+    function createFactWindow(idx) {
+      const container = document.getElementById('facts-container');
+      const div = document.createElement('div');
+      div.className = 'fact-window floating';
+      // Animate in from center
+      const centerX = window.innerWidth / 2;
+      const centerY = window.innerHeight / 2;
+      div.style.position = 'fixed';
+      div.style.left = centerX - 140 + 'px';
+      div.style.top = centerY - 70 + 'px';
+      div.style.opacity = '0';
+      div.style.transition = 'none';
+      div.textContent = shuffledFacts[idx];
+      // Dismiss button
+      const closeBtn = document.createElement('button');
+      closeBtn.innerHTML = '✖';
+      closeBtn.className = 'close-btn';
+      closeBtn.setAttribute('aria-label', 'Fakt schließen');
+      closeBtn.onclick = (e) => {
+        e.stopPropagation();
+        div.remove();
+        shownIndices.add(idx);
+        // Show a random available fact if any
+        let visible = document.querySelectorAll('.fact-window').length;
+        // Find all indices not shown and not currently visible
+        let visibleIndices = Array.from(document.querySelectorAll('.fact-window')).map(win => win.getAttribute('data-fact-idx')).filter(x => x !== null).map(Number);
+        let available = [];
+        for (let i = 0; i < shuffledFacts.length; i++) {
+          if (!shownIndices.has(i) && !visibleIndices.includes(i)) {
+            available.push(i);
+          }
+        }
+        if (available.length > 0 && visible < MAX_VISIBLE) {
+          // Pick a random available index
+          const randomIdx = available[Math.floor(Math.random() * available.length)];
+          createFactWindow(randomIdx);
+        }
+        checkAllShown();
+      };
+      div.appendChild(closeBtn);
+      div.setAttribute('data-fact-idx', idx);
+      // Animate to random position
+      setTimeout(() => {
+        const pad = 60;
+        const w = 280, h = 120;
+        const angle = Math.random() * 2 * Math.PI;
+        const maxDistX = (window.innerWidth / 2) - w - 32;
+        const maxDistY = (window.innerHeight / 2) - h - 32;
+        const dist = Math.random() * 0.5 + 0.5;
+        const dx = Math.cos(angle) * maxDistX * dist;
+        const dy = Math.sin(angle) * maxDistY * dist;
+        const finalLeft = centerX - w/2 + dx;
+        const finalTop = centerY - h/2 + dy;
+        div.style.transition = 'left 0.55s cubic-bezier(.7,0,.3,1), top 0.55s cubic-bezier(.7,0,.3,1), opacity 0.38s cubic-bezier(.7,0,.3,1)';
+        div.style.left = Math.max(16, Math.min(window.innerWidth - w - 16, finalLeft)) + 'px';
+        div.style.top = Math.max(16, Math.min(window.innerHeight - h - 16, finalTop)) + 'px';
+        div.style.opacity = '1';
+      }, 60);
+      // Drag logic (per window, no global listeners)
+      let offsetX, offsetY, dragging = false;
+      div.addEventListener('mousedown', function(e) {
+        if (e.target === closeBtn) return;
+        dragging = true;
+        offsetX = e.clientX - div.offsetLeft;
+        offsetY = e.clientY - div.offsetTop;
+        div.style.zIndex = 1000;
+        div.classList.remove('floating');
+        // Disable transitions during drag for less lag
+        const prevTransition = div.style.transition;
+        div.style.transition = 'none';
+        function onMove(ev) {
+          if (!dragging) return;
+          div.style.left = (ev.clientX - offsetX) + 'px';
+          div.style.top = (ev.clientY - offsetY) + 'px';
+        }
+        function onUp() {
+          if (dragging) {
+            dragging = false;
+            div.style.zIndex = 10;
+            div.classList.add('floating');
+            div.style.transition = prevTransition;
+            window.removeEventListener('mousemove', onMove);
+            window.removeEventListener('mouseup', onUp);
+          }
+        }
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
+      });
+      container.appendChild(div);
+    }
+    function checkAllShown() {
+      const again = document.getElementById('show-all-again-container');
+      if (shownIndices.size >= shuffledFacts.length) {
+        again.style.display = 'block';
+      } else {
+        again.style.display = 'none';
+      }
+    }
+    document.getElementById('show-all-again-btn').onclick = () => {
+      shownIndices.clear();
+      shuffledFacts = shuffle([...facts]);
+      showFactWindows();
+    };
+    document.getElementById('randomize-facts-btn').onclick = () => {
+      shownIndices.clear();
+      shuffledFacts = shuffle([...facts]);
+      showFactWindows();
+    };
+    window.addEventListener('DOMContentLoaded', showFactWindows);
+    window.addEventListener('resize', showFactWindows);
+
+    // Starfield speed slider logic
+    const speedSlider = document.getElementById('starfield-speed-slider');
+    const speedValue = document.getElementById('starfield-speed-value');
+    speedSlider.addEventListener('input', function() {
+      starfieldSpeed = parseFloat(this.value);
+      speedValue.textContent = this.value + 'x';
+    });
+  </script>
+</body>
+</html>
